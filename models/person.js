@@ -8,9 +8,8 @@ var schema = new Schema({
     job: String,
     home: String,
     skills: [{
-        type: String,
-        id: String,
-        level: Number
+        skillType: String,
+        skillLevel: Number
     }]
 });
 
@@ -31,6 +30,13 @@ schema.static.isPerson = function(personId, callback){
 schema.statics.createPerson = function(person, callback) {
     var Person = this;
     var npc = new Person(person);
+    var skill = {
+        type: person.skills.type,
+        level: person.skills.level
+    };
+    //npc.skills.push(person.skills);
+    
+    npc.markModified('skills');
     npc.save(function(err){
         if (err){
             callback(err);

@@ -1,6 +1,7 @@
 var async = require('async');
 var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCharacteristic;
+var log = require('../libs/log')(module);
 
 var persons = [];
 
@@ -9,31 +10,62 @@ var rand = function (min, max) {
 };
 
 var jobs = {
-    "1": "Лесоруб",
-    "2": "Углежог",
-    "3": "Рыболов",
-    "4": "Охотник",
-    "5": "Фермер"
+    "1": {
+        jobName: "Лесоруб",
+        skillName: "Лесорубство"
+    },
+    "2": {
+        jobName: "Углежог",
+        skillName: "Углежогство"
+    },
+    "3": {
+        jobName: "Рыболов",
+        skillName: "Рыболовство"
+    },
+    "4": {
+        jobName: "Охотник",
+        skillName: "Охота"
+    },
+    "5": {
+        jobName: "Фермер",
+        skillName: "Фермерство"
+    }
 };
 
 for(var i = 0; i < 99; i++){
+    var j = rand(1,5);
+    var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
     var p = {
         name: "Персонаж №" + i,
-        job: jobs[rand(1,5)],
-        skills: [
-            {
-
-            }
-        ]
+        job: jobs[j].jobName,
+        skills: {
+           skillType: jobs[j].skillName,
+           skillLevel: s
+        }
     };
+    persons.push(p);
 }
 
-Person.createPerson({name: "Тим Гарилек"}, function(err, person){
-    if(err){
-        console.log(err);
-    }
-    console.log(person);
+log.info("Начинаем сохранение!");
+async.each(persons, function(person){
+    Person.createPerson(person, function(err, personCb){
+        if(err) console.log(err);
+    });
+}, function(err){
+    if(err) console.log(err);
+    log.info("Сохранение завершено!");
 });
+
+
+
+// Person.createPerson({ name: 'Персонаж №1',
+//   job: 'Рыболов',
+//   skills: {} }, function(err, person){
+//     if(err){
+//         console.log(err);
+//     }
+//     console.log(person);
+// });
 
 /*User.createUser("Tester", "test", function(err, user){
     if(err){
