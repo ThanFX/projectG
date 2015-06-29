@@ -14,15 +14,17 @@ var schema = new Schema({
         x: Number,
         y: Number
     },
+    state: String,
     created: {
         type: Date,
         default: Date.now
     }
 });
 
-schema.static.upsertPersonCharacteristics = function(personId, characteristics, location, callback){
+schema.static.upsertPCh = function(/*personId, state, characteristics, location*/ q, callback){
+    console.log("!!");
     var Ch = this;
-    Person.isPerson(personId, function(err, person){
+    Person.isPerson({_id: personId}, function(err, person){
         if(err){
             callback(err);
         }
@@ -33,6 +35,9 @@ schema.static.upsertPersonCharacteristics = function(personId, characteristics, 
                 }
                 if(!values){
                     values = new Ch({personId: personId});
+                }
+                if(state){
+                    values.state = state;
                 }
                 if(characteristics){
                     values.item = characteristics;
@@ -49,8 +54,11 @@ schema.static.upsertPersonCharacteristics = function(personId, characteristics, 
                     callback(null, values);
                 });
             });
+        } else {
+            log.warn("Пользователь " + personId + " не существует");
+            callback("User not found", null);
         }
     });
 };
 
-exports.PersonCharacteristic = mongoose.model('Person.Characteristic', schema);
+exports.PersonCh = mongoose.model('Person.Characteristic', schema);

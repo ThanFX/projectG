@@ -1,6 +1,6 @@
 var async = require('async');
 var Person = require('../models/person').Person;
-var Chars = require('../models/person.characteristic').PersonCharacteristic;
+var Chars = require('../models/person.characteristic').PersonCh;
 var log = require('../libs/log')(module);
 
 var persons = [];
@@ -32,29 +32,77 @@ var jobs = {
     }
 };
 
-for(var i = 0; i < 99; i++){
-    var j = rand(1,5);
-    var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
-    var p = {
-        name: "Персонаж №" + i,
-        job: jobs[j].jobName,
-        skills: {
-           skillType: jobs[j].skillName,
-           skillLevel: s
-        }
-    };
-    persons.push(p);
-}
+//for(var i = 0; i < 99; i++){
+//    var j = rand(1,5);
+//    var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
+//    var p = {
+//        name: "Персонаж №" + i,
+//        job: jobs[j].jobName,
+//        skills: {
+//           skillType: jobs[j].skillName,
+//           skillLevel: s
+//        }
+//    };
+//    persons.push(p);
+//}
 
-log.info("Начинаем сохранение!");
-async.each(persons, function(person){
-    Person.createPerson(person, function(err, personCb){
-        if(err) console.log(err);
-    });
-}, function(err){
-    if(err) console.log(err);
-    log.info("Сохранение завершено!");
+
+
+log.info("Сохраняем характеристики");
+Person.find({name: "Тим Гарилек"}, function(err, persons){
+    if(err){
+        log.err(err);
+    }
+    if(!persons){
+        log.info("Пользователи не найдены");
+    } else {
+        var skills = [
+            {
+                name: "Здоровье",
+                value: 100
+            },
+            {
+                name: "Сила",
+                value: rand(60, 100)
+            },
+            {
+                name: "Выносливость",
+                value: rand(60, 100)
+            },
+            {
+                name: "Усталость",
+                value: 0
+            },
+            {
+                name: "Голод",
+                value: 0
+            },
+            {
+                name: "Жажда",
+                value: 0
+            }
+        ];
+        async.each(persons, function(person){
+            console.log("!");
+            Chars.upsertPCh(null, function(err){
+                if(err) log.err(err);
+            });
+        }, function(err){
+            if(err) log.err(err);
+        });
+        //console.log(persons);
+    }
 });
+
+//log.info("Начинаем сохранение!");
+//async.each(persons, function(person){
+//    Person.createPerson(person, function(err, personCb){
+//        if(err) console.log(err);
+//    });
+//}, function(err){
+//    if(err) console.log(err);
+//    log.info("Сохранение завершено!");
+//});
 
 
 

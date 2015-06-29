@@ -10,7 +10,11 @@ var schema = new Schema({
     skills: [{
         skillType: String,
         skillLevel: Number
-    }]
+    }],
+    created: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 schema.static.isPerson = function(personId, callback){
