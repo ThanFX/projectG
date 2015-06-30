@@ -46,51 +46,47 @@ var jobs = {
 //    persons.push(p);
 //}
 
-
-
 log.info("Сохраняем характеристики");
-Person.find({name: "Тим Гарилек"}, function(err, persons){
+Person.find({"job" : {$ne: "Староста"}}, function(err, persons){
     if(err){
         log.err(err);
     }
     if(!persons){
         log.info("Пользователи не найдены");
     } else {
-        var skills = [
-            {
-                name: "Здоровье",
-                value: 100
-            },
-            {
-                name: "Сила",
-                value: rand(60, 100)
-            },
-            {
-                name: "Выносливость",
-                value: rand(60, 100)
-            },
-            {
-                name: "Усталость",
-                value: 0
-            },
-            {
-                name: "Голод",
-                value: 0
-            },
-            {
-                name: "Жажда",
-                value: 0
-            }
-        ];
         async.each(persons, function(person){
-            console.log("!");
-            Chars.upsertPCh(null, function(err){
+            var skills = [
+                {
+                    name: "Здоровье",
+                    value: 100
+                },
+                {
+                    name: "Сила",
+                    value: rand(60, 100)
+                },
+                {
+                    name: "Выносливость",
+                    value: rand(60, 100)
+                },
+                {
+                    name: "Усталость",
+                    value: 0
+                },
+                {
+                    name: "Голод",
+                    value: 0
+                },
+                {
+                    name: "Жажда",
+                    value: 0
+                }
+            ];
+            Chars.upsertPCh(person._id, "Сон", skills, {x:0,y:0}, function(err){
                 if(err) log.err(err);
             });
         }, function(err){
             if(err) log.err(err);
         });
-        //console.log(persons);
     }
 });
 

@@ -17,7 +17,7 @@ var schema = new Schema({
     }
 });
 
-schema.static.isPerson = function(personId, callback){
+schema.statics.isPerson = function(personId, callback){
     this.findOne({_id: personId}, function(err, person){
         if(err){
             callback(err);

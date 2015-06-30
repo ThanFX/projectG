@@ -21,7 +21,7 @@ var schema = new Schema({
     }
 });
 
-schema.static.upsertPCh = function(/*personId, state, characteristics, location*/ q, callback){
+schema.statics.upsertPCh = function(personId, state, characteristics, location, callback){
     console.log("!!");
     var Ch = this;
     Person.isPerson({_id: personId}, function(err, person){
@@ -42,16 +42,19 @@ schema.static.upsertPCh = function(/*personId, state, characteristics, location*
                 if(characteristics){
                     values.item = characteristics;
                     values.markModified('item');
+                    console.log(values.item);
                 }
                 if(location){
-                    values.item = location;
+                    values.location = location;
                     values.markModified('location');
+                    console.log(values.location);
                 }
-                values.save(function(err){
+                
+                values.save(function(err, ch){
                     if(err){
                         callback(err);
-                    }
-                    callback(null, values);
+                    }   
+                    callback(null, ch);
                 });
             });
         } else {
