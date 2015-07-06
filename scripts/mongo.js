@@ -9,6 +9,17 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+var time = function() {
+    var startTime = new Date();
+    console.log(startTime);
+}
+
+var mainTimer = setInterval(time, 1000);
+
+
+
+//var mainTimet = setInterval(function(){})
+
 // var jobs = {
 //     "1": {
 //         jobName: "Лесоруб",
