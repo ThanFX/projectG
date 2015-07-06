@@ -2,6 +2,8 @@ var async = require('async');
 var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
 var log = require('../libs/log')(module);
+var Settings = require('../models/settings').Settings;
+
 
 //var persons = [];
 
@@ -9,13 +11,21 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
-var time = function() {
-    var startTime = new Date();
-    console.log(startTime);
-}
+var timer;
 
-var mainTimer = setInterval(time, 1000);
+var mainTimer = function() {
+    Settings.setTime(Date.now(), function(err, curTime){
+        if(err){
+            log.err(err);
+        }
+        timer = curTime.value;
+        setTimeout(mainTimer, 1000);
+    });
+};
 
+mainTimer();
+
+setInterval(function(){log.info(new Date(timer));}, 5000);
 
 
 //var mainTimet = setInterval(function(){})

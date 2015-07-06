@@ -22,7 +22,6 @@ var schema = new Schema({
 });
 
 schema.statics.upsertPCh = function(personId, state, characteristics, location, callback){
-    console.log("!!");
     var Ch = this;
     Person.isPerson({_id: personId}, function(err, person){
         if(err){

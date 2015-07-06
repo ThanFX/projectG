@@ -38,7 +38,6 @@ schema.statics.createPerson = function(person, callback) {
         type: person.skills.type,
         level: person.skills.level
     };
-    //npc.skills.push(person.skills);
     
     npc.markModified('skills');
     npc.save(function(err){
