@@ -7,6 +7,7 @@ var Schema = mongoose.Schema;
 var schema = new Schema({
     personId: Schema.ObjectId,
     item: [{
+        _id: false,
         name: String,
         value: Number
     }],

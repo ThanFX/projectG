@@ -3,34 +3,46 @@ var mongoose = require('../libs/mongoose');
 var async = require('async');
 var Schema = mongoose.Schema;
 
-var schema = new Schema({
+var timeSchema = new Schema({
     settingType: String,
-    value: String
+    serverTime: String
 });
 
-schema.statics.setTime = function(newTime, callback){
-    var Settings = this;
-    Settings.findOne({settingType:"time"}, function(err, curTime){
+var configSchema = new Schema({
+    settingType: String,
+    params: [
+        {
+            _id: false,
+            name: String,
+            value: String
+        }
+    ]
+});
+
+timeSchema.statics.setTime = function(newTime, callback){
+    var timeSettings = this;
+    timeSettings.findOne({settingType:"time"}, function(err, curTime){
         if(err) {
             log.err(err);
             callback(err);
         }
         if(!curTime) {
-            curTime = new Settings({settingType:"time", value:null});
+            curTime = new timeSettings({settingType:"time", serverTime:null});
         }
-        curTime.value = newTime;
+        curTime.serverTime = newTime;
         curTime.save(function(err){
             if(err) {
                 log.err(err);
                 callback(err);
             }
-            callback(null, curTime.value);
+            callback(null, curTime.serverTime);
         });
     });
 };
 
-schema.statics.getTime = function(callback){
-    this.findOne({settingType:"time"}, function(err, curTime) {
+timeSchema.statics.getTime = function(callback){
+    var timeSettings = this;
+    timeSettings.findOne({settingType:"time"}, function(err, curTime) {
         if (err) {
             log.err(err);
             callback(err);
@@ -39,4 +51,39 @@ schema.statics.getTime = function(callback){
     });
 };
 
-exports.Settings = mongoose.model('settings', schema);
+configSchema.statics.setConfig = function(params, callback){
+    var configSettings = this;
+    configSettings.findOne({settingType:"config"}, function(err, curConfig){
+        if(err) {
+            log.err(err);
+            callback(err);
+        }
+        if(!curConfig) {
+            curConfig = new configSettings({settingType:"config"});
+        }
+        curConfig.params = params;
+        console.log(curConfig);
+        curConfig.markModified('params');
+        curConfig.save(function(err){
+            if(err) {
+                log.err(err);
+                callback(err);
+            }
+            callback(null, curConfig);
+        });
+    });
+};
+
+configSchema.statics.getConfig = function(callback){
+    var configSettings = this;
+    configSettings.findOne({settingType:"config"}, function(err, curConfig) {
+        if (err) {
+            log.err(err);
+            callback(err);
+        }
+        callback(null, curConfig);
+    });
+};
+
+exports.timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
+exports.configSettings = mongoose.model('configSettings', configSchema, 'settings');

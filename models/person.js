@@ -8,6 +8,7 @@ var schema = new Schema({
     job: String,
     home: String,
     skills: [{
+        _id: false,
         skillType: String,
         skillLevel: Number
     }],
