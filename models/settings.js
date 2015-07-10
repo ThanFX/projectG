@@ -5,7 +5,8 @@ var Schema = mongoose.Schema;
 
 var timeSchema = new Schema({
     settingType: String,
-    serverTime: String
+    lastServerTime: String,
+    lastWorldTime: String
 });
 
 var configSchema = new Schema({
@@ -27,9 +28,10 @@ timeSchema.statics.setTime = function(newTime, callback){
             callback(err);
         }
         if(!curTime) {
-            curTime = new timeSettings({settingType:"time", serverTime:null});
+            curTime = new timeSettings({settingType:"time", lastServerTime:null});
         }
-        curTime.serverTime = newTime;
+        curTime.lastServerTime = newTime;
+        curTime.lastWorldTime = newTime - 1400259834812;
         curTime.save(function(err){
             if(err) {
                 log.err(err);

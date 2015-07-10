@@ -5,40 +5,46 @@ var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
 
-
-//var persons = [];
-
 var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
 var timer;
 
-var mainTimer = function() {
-    timeSettings.setTime(Date.now(), function(err, curTime){
-        if(err){
-            log.err(err);
-        }
-        setTimeout(mainTimer, 1000);
-    });
-};
-
-mainTimer();
+//configSettings.getConfig(function(err, config){
+//    if(err){
+//        log.err(err);
+//    }
+//    var bwt = config.params.
+//});
 
 
+var bwt = 1400259834812;
 
+timeSettings.getTime(function(err, curTime){
+    if(err){
+        log.err(err);
+    }
+    var deltaTime = Date.now() - curTime.lastServerTime;
+    var mainTimer = function() {
+        timeSettings.setTime(Date.now(), deltaTime, function(err, curTime){
+            if(err){
+                log.err(err);
+            }
+            setTimeout(mainTimer, 1000);
+        });
+    };
+    mainTimer();
+});
 
-// var config = [{"name": "createWorldTime", "value": "1400259834812"}];
-// console.log(config);
-
-// configSettings.setConfig(config, function(err){
+//var config = [{"name": "createWorldTime", "value": "1400259834812"}];
+//console.log(config);
+//
+//configSettings.setConfig(config, function(err){
 //     if(err){
 //         log.err(err);
 //     }
-// });
-
-
-//var mainTimet = setInterval(function(){})
+//});
 
 // var jobs = {
 //     "1": {
@@ -141,27 +147,3 @@ mainTimer();
 //     }
 //     console.log(person);
 // });
-
-/*User.createUser("Tester", "test", function(err, user){
-    if(err){
-        console.log(err);
-    } else {
-        console.log(user)
-    }
-});*/
-
-/*User.authorize("Tester", "test", function(err, user){
-    if(err){
-        console.log(err);
-    } else {
-        console.log(user)
-    }
-});*/
-
-/*User.saveJIRAParams("Tester", "login", "pass2", "http://jira.com", function(err, user){
-    if(err){
-        console.log(err);
-    } else {
-        console.log(user)
-    }
-});*/
