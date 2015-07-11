@@ -2,42 +2,22 @@ var async = require('async');
 var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
 var log = require('../libs/log')(module);
-var timeSettings = require('../models/settings').timeSettings;
+//var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
+var mainTimer = require('../modules/mainTimer')();
 
 var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
-var timer;
-
-//configSettings.getConfig(function(err, config){
-//    if(err){
-//        log.err(err);
-//    }
-//    var bwt = config.params.
-//});
 
 
-var bwt = 1400259834812;
 
-timeSettings.getTime(function(err, curTime){
-    if(err){
-        log.err(err);
-    }
-    var deltaTime = Date.now() - curTime.lastServerTime;
-    var mainTimer = function() {
-        timeSettings.setTime(Date.now(), deltaTime, function(err, curTime){
-            if(err){
-                log.err(err);
-            }
-            setTimeout(mainTimer, 1000);
-        });
-    };
-    mainTimer();
-});
 
-//var config = [{"name": "createWorldTime", "value": "1400259834812"}];
+
+
+
+//var config = {"createWorldTime": "1400259834812"};
 //console.log(config);
 //
 //configSettings.setConfig(config, function(err){

@@ -11,16 +11,10 @@ var timeSchema = new Schema({
 
 var configSchema = new Schema({
     settingType: String,
-    params: [
-        {
-            _id: false,
-            name: String,
-            value: String
-        }
-    ]
+    params: Schema.Types.Mixed
 });
 
-timeSchema.statics.setTime = function(newTime, callback){
+timeSchema.statics.setTime = function(newTime, deltaTime, callback){
     var timeSettings = this;
     timeSettings.findOne({settingType:"time"}, function(err, curTime){
         if(err) {
@@ -28,16 +22,16 @@ timeSchema.statics.setTime = function(newTime, callback){
             callback(err);
         }
         if(!curTime) {
-            curTime = new timeSettings({settingType:"time", lastServerTime:null});
+            curTime = new timeSettings({settingType:"time"});
         }
         curTime.lastServerTime = newTime;
-        curTime.lastWorldTime = newTime - 1400259834812;
+        curTime.lastWorldTime = newTime - deltaTime;
         curTime.save(function(err){
             if(err) {
                 log.err(err);
                 callback(err);
             }
-            callback(null, curTime.serverTime);
+            callback(null, curTime);
         });
     });
 };
