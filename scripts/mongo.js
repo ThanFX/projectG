@@ -14,9 +14,6 @@ var rand = function (min, max) {
 
 
 
-
-
-
 //var config = {"createWorldTime": "1400259834812"};
 //console.log(config);
 //
