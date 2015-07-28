@@ -2,7 +2,7 @@ var async = require('async');
 var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
 var log = require('../libs/log')(module);
-//var timeSettings = require('../models/settings').timeSettings;
+var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
 var mainTimer = require('../modules/mainTimer')();
 
@@ -10,9 +10,17 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+var worldDate = function(){
+    timeSettings.getWorldTime(function(err, worldTime){
+        if(err){
+            log.err(err);
+        }
+        console.log(worldTime);
+    });
+    setTimeout(worldDate, 1000);
+};
 
-
-
+worldDate();
 
 //var config = {"createWorldTime": "1400259834812"};
 //console.log(config);

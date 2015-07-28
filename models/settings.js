@@ -80,6 +80,54 @@ configSchema.statics.getConfig = function(callback){
         callback(null, curConfig);
     });
 };
+/* Рассчитываем нормальное календарное время мира
+*
+*/
+timeSchema.statics.getWorldTime = function(callback){
+    var timeSettings = this;
+    configSettings = mongoose.model('configSettings', configSchema, 'settings');
+    configSettings.getConfig(function(err, config){
+        if(err){
+            log.err(err);
+            callback(err);
+        }
+        if(!config){
+            log.err("Ошибка загрузки конфигурации");
+            callback(null);
+        }
+        // Читаем конфиг календаря
+        timeSettings.getTime(function(err, curTime){
+            if(err){
+                log.err(err);
+                callback(err);
+            }
+            if(!curTime){
+                log.err("Ошибка загрузки времени");
+                callback(null);
+            }
+            // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента ускорения времени.
+            // !ToDo Для месяца, декады и дня нет нулевых значений, начинаяются с единицы, максимальное на 1 больше
+            var worldSeconds = (curTime.lastWorldTime * config.params.calendar.worldTimeKoef) / 1000;
+            var sec = worldSeconds;
+            var worldTime = {};
+            var periods = config.params.calendar.periods;
+            //Сортируем массив периодов календаря по убыванию количества секунд в периоде
+            periods.sort(function(elem1, elem2){
+                return elem2.timeInSeconds - elem1.timeInSeconds;
+            });
+            //Получаем нормальные дату и время исходя из конфигурации календаря
+            periods.forEach(function(period, i, periods){
+                if(period.timeInSeconds > sec) {
+                    worldTime[period.periodLabel] = 0;
+                } else {
+                    worldTime[period.periodLabel] = Math.floor(sec / period.timeInSeconds);
+                    sec = sec - (worldTime[period.periodLabel] * period.timeInSeconds);
+                }
+            });
+            callback(null, worldTime);
+        });
+    });
+};
 
 exports.timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
 exports.configSettings = mongoose.model('configSettings', configSchema, 'settings');
