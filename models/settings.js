@@ -106,7 +106,6 @@ timeSchema.statics.getWorldTime = function(callback){
                 callback(null);
             }
             // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента ускорения времени.
-            // !ToDo Для месяца, декады и дня нет нулевых значений, начинаяются с единицы, максимальное на 1 больше
             var worldSeconds = (curTime.lastWorldTime * config.params.calendar.worldTimeKoef) / 1000;
             var sec = worldSeconds;
             var worldTime = {};
@@ -116,12 +115,14 @@ timeSchema.statics.getWorldTime = function(callback){
                 return elem2.timeInSeconds - elem1.timeInSeconds;
             });
             //Получаем нормальные дату и время исходя из конфигурации календаря
+            // Для месяца, декады и дня нет нулевых значений, они начинаются с единицы, но максимальное на 1 больше
             periods.forEach(function(period, i, periods){
                 if(period.timeInSeconds > sec) {
-                    worldTime[period.periodLabel] = 0;
+                    worldTime[period.periodLabel] = 0 + +period.minValue;
                 } else {
                     worldTime[period.periodLabel] = Math.floor(sec / period.timeInSeconds);
                     sec = sec - (worldTime[period.periodLabel] * period.timeInSeconds);
+                    worldTime[period.periodLabel] += +period.minValue;
                 }
             });
             callback(null, worldTime);
