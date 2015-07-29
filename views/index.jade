@@ -6,6 +6,6 @@ block content
 	script(src='/socket.io/socket.io.js')
 	script.
 		var socket = io('http://localhost:3000');
-		socket.on('worldDate', function(worldDate){
-			console.log(worldDate);
+		socket.on('data', function(data){
+			console.log(data);
 		});

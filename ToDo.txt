@@ -19,5 +19,4 @@
 17. Карта государста.
 18. Заселяем всё государство деревнями.
 
-Начало вечером: { year: 13, month: 11, ten_day: 2, day: 9, hour: 16, minute: 55 }
-Окончание утром: { year: 14, month: 0, ten_day: 0, day: 4, hour: 1, minute: 20 }
+env: DEBUG=socket.io:* node index.js

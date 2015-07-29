@@ -10,7 +10,7 @@ function getLogger(module) {
             new winston.transports.Console({
                 colorize: true,
                 //level: ENV == 'development' ? 'debug' : 'error',
-                level: 'debug',
+                level: 'development',
                 label: path,
                 timestamp: true
             })
