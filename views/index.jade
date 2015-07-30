@@ -8,7 +8,7 @@ block content
 	script.
 		var socket = io('http://localhost:3000');
 		var setDisplayTime = function(value){
-			if(value.length == 1){
+			if(+value < 10){
 				value = '0' + value;
 			}
 			return value;

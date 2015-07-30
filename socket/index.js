@@ -21,7 +21,7 @@ module.exports = function(server){
         var emitWorldDate = function(){
         	worldDate();
         	setTimeout(emitWorldDate, 5000);
-    	}
+    	};
     	emitWorldDate();
     });
 };
