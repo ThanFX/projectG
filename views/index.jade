@@ -3,9 +3,22 @@ extends layout
 block content
 	h1= title
 	p Welcome to #{title}
+	div.worldDate
 	script(src='/socket.io/socket.io.js')
 	script.
 		var socket = io('http://localhost:3000');
-		socket.on('data', function(data){
-			console.log(data);
+		var setDisplayTime = function(value){
+			if(value.length == 1){
+				value = '0' + value;
+			}
+			return value;
+		};
+		socket.on('worldDate', function(worldDate){
+			var wd = document.querySelector('.worldDate');
+			var date = 'Сейчас '+ worldDate.day + ' день ' + worldDate.ten_day + 
+			' декады ' + worldDate.month + ' месяца ' + worldDate.year + 
+			' года, ' + setDisplayTime(worldDate.hour) + ':' + 
+			setDisplayTime(worldDate.minute);
+			wd.innerHTML = date;
+			//console.log(worldDate);
 		});
