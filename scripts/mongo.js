@@ -10,18 +10,29 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
-var worldDate = function(){
-    timeSettings.getWorldTime(function(err, worldTime){
-        if(err){
-            log.err(err);
-        }
-        console.log(worldTime);
-    });
-    setTimeout(worldDate, 1000);
-};
 
-worldDate();
+Person.getPersonCh('*', function(err, persons){
+    if(err){
+        log.error(err);
+    }
+    for(var i = 0; i < persons.length; i++){
+        console.log('{ _id: ' + persons[i]._id + ' | ' + persons[i].name + ' | ' + persons[i].job);
+        console.log(persons[i].characteristics);
+    }
+});
 
+
+//var worldDate = function(){
+//    timeSettings.getWorldTime(function(err, worldTime){
+//        if(err){
+//            log.err(err);
+//        }
+//        console.log(worldTime);
+//    });
+//    setTimeout(worldDate, 1000);
+//};
+//
+//worldDate();
 
 //var config = {"createWorldTime": "1400259834812"};
 //console.log(config);

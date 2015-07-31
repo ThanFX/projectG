@@ -50,17 +50,28 @@ schema.statics.upsertPCh = function(personId, state, characteristics, location, 
                     console.log(values.location);
                 }
                 
-                values.save(function(err, ch){
+                values.save(function(err, pch){
                     if(err){
                         callback(err);
                     }   
-                    callback(null, ch);
+                    callback(null, pch);
                 });
             });
         } else {
             log.warn("Пользователь " + personId + " не существует");
             callback("User not found", null);
         }
+    });
+};
+
+schema.statics.getPCh = function(personId, callback){
+    var ch = this;
+    ch.findOne({personId: personId}, function(err, charcteristics){
+        if(err){
+            log.error(err);
+            callback(err);
+        }
+        callback(null, charcteristics);
     });
 };
 

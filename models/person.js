@@ -2,6 +2,7 @@ var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
 var async = require('async');
 var Schema = mongoose.Schema;
+var personCh = require('../models/person.characteristic').PersonCh;
 
 var schema = new Schema({
     name: String,
@@ -47,6 +48,39 @@ schema.statics.createPerson = function(person, callback) {
         }
         log.info("Person " + npc.name + ' create successful');
         callback(null, npc);
+    });
+};
+
+schema.statics.getPersonCh = function(query, callback){
+    var Person = this;
+    Person.find(query, function(err, persons){
+        if(err){
+            log.error(err);
+            callback(err);
+        }
+        async.map(persons,
+            function(person, personCallback){
+                //console.log(person);
+                personCh.getPCh(person._id, function(errCh, ch){
+                    if(errCh){
+                        log.error(err);
+                        callback(err);
+                    }
+                    var p = person;
+                    p.characteristics = ch;
+                    //console.log(p);
+                    personCallback(null, p);
+                });
+            },
+            function(err, personsCh){
+                if(err){
+                    log.error(err);
+                    callback(err);
+                }
+                callback(null, personsCh);
+            }
+        );
+        //console.log(personChArray);
     });
 };
 
