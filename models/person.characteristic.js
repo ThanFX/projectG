@@ -71,7 +71,12 @@ schema.statics.getPCh = function(personId, callback){
             log.error(err);
             callback(err);
         }
-        callback(null, charcteristics);
+        var ch = {
+            state: charcteristics.state,
+            location: charcteristics.location,
+            item: charcteristics.item
+        };
+        callback(null, ch);
     });
 };
 

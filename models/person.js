@@ -66,9 +66,12 @@ schema.statics.getPersonCh = function(query, callback){
                         log.error(err);
                         callback(err);
                     }
-                    var p = person;
-                    p.characteristics = ch;
-                    //console.log(p);
+                    var p = {
+                        name: person.name,
+                        job: person.job,
+                        skills: person.skills,
+                        characterisitics: ch
+                    };
                     personCallback(null, p);
                 });
             },
