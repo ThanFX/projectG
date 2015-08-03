@@ -1,6 +1,7 @@
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
 var async = require('async');
+var crypto = require('crypto');
 var Schema = mongoose.Schema;
 var personCh = require('../models/person.characteristic').PersonCh;
 
@@ -67,6 +68,7 @@ schema.statics.getPersonCh = function(query, callback){
                         callback(err);
                     }
                     var p = {
+                        id: crypto.createHash('md5').update(person._id + '').digest('hex'),
                         name: person.name,
                         job: person.job,
                         skills: person.skills,
