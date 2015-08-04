@@ -1,0 +1,46 @@
+.person {
+    width: 280px;
+    padding: 5px;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.name {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.general {
+    margin-bottom: 10px;
+}
+
+.general div, .attributes div{
+    display: inline-block;
+}
+
+.state {
+    width: 66.7%;
+}
+
+.health, .fatigue, .hunger {
+    width: 25%;
+}
+
+.attributes>div {
+    position: relative;
+}
+
+.attributes>div:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 30px;
+    top: -10px;
+    z-index: 1;
+    background: rgba(255,255,230,0.9);
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    padding: 5px 10px;
+    border: 1px solid #333;
+    border-radius: 3px;
+}

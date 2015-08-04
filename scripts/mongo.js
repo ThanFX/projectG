@@ -43,7 +43,7 @@ Person.getPersonCh('*', function(err, persons){
 //     }
 //});
 
-// var jobs = {
+//var jobs = {
 //     "1": {
 //         jobName: "Лесоруб",
 //         skillName: "Лесорубство"
@@ -64,13 +64,15 @@ Person.getPersonCh('*', function(err, persons){
 //         jobName: "Фермер",
 //         skillName: "Фермерство"
 //     }
-// };
-
-//for(var i = 0; i < 99; i++){
+//};
+//console.log("Начинаем генерацию персонажей");
+//var time1 = Date.now();
+//var persons = [];
+//for(var i = 0; i < 10000; i++){
 //    var j = rand(1,5);
 //    var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
 //    var p = {
-//        name: "Персонаж №" + i,
+//        name: "Tester",
 //        job: jobs[j].jobName,
 //        skills: {
 //           skillType: jobs[j].skillName,
@@ -78,61 +80,109 @@ Person.getPersonCh('*', function(err, persons){
 //        }
 //    };
 //    persons.push(p);
+//    console.log(i);
+//    if((i % 1000) == 0){
+//        console.log(i/1000 + '%');
+//    }
 //}
-
-// log.info("Сохраняем характеристики");
-// Person.find({"job" : {$ne: "Староста"}}, function(err, persons){
-//     if(err){
-//         log.err(err);
-//     }
-//     if(!persons){
-//         log.info("Пользователи не найдены");
-//     } else {
-//         async.each(persons, function(person){
-//             var skills = [
-//                 {
-//                     name: "Здоровье",
-//                     value: 100
-//                 },
-//                 {
-//                     name: "Сила",
-//                     value: rand(60, 100)
-//                 },
-//                 {
-//                     name: "Выносливость",
-//                     value: rand(60, 100)
-//                 },
-//                 {
-//                     name: "Усталость",
-//                     value: 0
-//                 },
-//                 {
-//                     name: "Голод",
-//                     value: 0
-//                 },
-//                 {
-//                     name: "Жажда",
-//                     value: 0
-//                 }
-//             ];
-//             Chars.upsertPCh(person._id, "Сон", skills, {x:0,y:0}, function(err){
-//                 if(err) log.err(err);
-//             });
-//         }, function(err){
-//             if(err) log.err(err);
-//         });
-//     }
-// });
-
-//log.info("Начинаем сохранение!");
-//async.each(persons, function(person){
-//    Person.createPerson(person, function(err, personCb){
-//        if(err) console.log(err);
-//    });
-//}, function(err){
-//    if(err) console.log(err);
-//    log.info("Сохранение завершено!");
-//});
+//var time2 = Date.now();
+//console.log("Закончили генерацию, всего - " + persons.length + '. Затрачено ' + (time2 - time1)/1000 + ' секунд');
+//
+//
+////log.info("Сохраняем характеристики");
+////Person.find({"job" : {$ne: "Староста"}}, function(err, persons){
+////     if(err){
+////         log.err(err);
+////     }
+////     if(!persons){
+////         log.info("Пользователи не найдены");
+////     } else {
+////         async.each(persons, function(person){
+////             var skills = [
+////                 {
+////                     name: "Здоровье",
+////                     value: 100
+////                 },
+////                 {
+////                     name: "Сила",
+////                     value: rand(60, 100)
+////                 },
+////                 {
+////                     name: "Выносливость",
+////                     value: rand(60, 100)
+////                 },
+////                 {
+////                     name: "Усталость",
+////                     value: 0
+////                 },
+////                 {
+////                     name: "Голод",
+////                     value: 0
+////                 },
+////                 {
+////                     name: "Жажда",
+////                     value: 0
+////                 }
+////             ];
+////             Chars.upsertPCh(person._id, "Сон", skills, {x:0,y:0}, function(err){
+////                 if(err) log.err(err);
+////             });
+////         }, function(err){
+////             if(err) log.err(err);
+////         });
+////     }
+////});
+//
+//console.log("Начинаем сохранение!");
+//var time3 = Date.now();
+//var pp = 0;
+//async.each(persons,
+//    function(person, personCallback){
+//        Person.createPerson(person, function(err, personCb){
+//            //if(err) console.log(err);
+//            var skills = [
+//                {
+//                    name: "Здоровье",
+//                    value: 100
+//                },
+//                {
+//                    name: "Сила",
+//                    value: rand(60, 100)
+//                },
+//                {
+//                    name: "Выносливость",
+//                    value: rand(60, 100)
+//                },
+//                {
+//                    name: "Усталость",
+//                    value: 0
+//                },
+//                {
+//                    name: "Голод",
+//                    value: 0
+//                },
+//                {
+//                    name: "Жажда",
+//                    value: 0
+//                }
+//            ];
+//            Chars.upsertPCh(personCb._id, "test", skills, {x:0,y:0}, function(err){
+//                if(err) console.log(err);
+//                pp++;
+//                if((pp % 10000) === 0){
+//                    console.log(pp/10000 + '%');
+//                }
+//                personCallback(null, 1);
+//            });
+//        });
+//    },
+//    function(){
+//        //if(err) log.error(err);
+//        var time4 = Date.now();
+//        console.log("Сохранение завершено!");
+//        console.log("Закончили сохранение. Затрачено " + (time4 - time3)/1000 + " секунд");
+//    }
+//);
 
 
 

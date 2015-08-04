@@ -1,6 +1,6 @@
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
-var async = require('async');
+//var async = require('async');
 var Person = require('../models/person').Person;
 var Schema = mongoose.Schema;
 
@@ -42,12 +42,12 @@ schema.statics.upsertPCh = function(personId, state, characteristics, location, 
                 if(characteristics){
                     values.item = characteristics;
                     values.markModified('item');
-                    console.log(values.item);
+                    //console.log(values.item);
                 }
                 if(location){
                     values.location = location;
                     values.markModified('location');
-                    console.log(values.location);
+                    //console.log(values.location);
                 }
                 
                 values.save(function(err, pch){
