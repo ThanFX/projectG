@@ -16,22 +16,34 @@ var configSchema = new Schema({
 
 timeSchema.statics.setTime = function(newTime, deltaTime, callback){
     var timeSettings = this;
-    timeSettings.findOne({settingType:"time"}, function(err, curTime){
-        if(err) {
+    configSettings = mongoose.model('configSettings', configSchema, 'settings');
+    configSettings.getConfig(function(err, config) {
+        if (err) {
             log.err(err);
             callback(err);
         }
-        if(!curTime) {
-            curTime = new timeSettings({settingType:"time"});
+        if (!config) {
+            log.err("Ошибка загрузки конфигурации");
+            callback(null);
         }
-        curTime.lastServerTime = newTime;
-        curTime.lastWorldTime = newTime - deltaTime;
-        curTime.save(function(err){
-            if(err) {
+        timeSettings.findOne({settingType: "time"}, function (err, curTime) {
+            if (err) {
                 log.err(err);
                 callback(err);
             }
-            callback(null, curTime);
+            if (!curTime) {
+                curTime = new timeSettings({settingType: "time"});
+            }
+            curTime.lastServerTime = newTime;
+            var deltaWorldTime = ((newTime - deltaTime) - curTime.lastWorldTime) * config.params.worldTimeSpeedKoef;
+            curTime.lastWorldTime = +curTime.lastWorldTime + deltaWorldTime;
+            curTime.save(function (err) {
+                if (err) {
+                    log.err(err);
+                    callback(err);
+                }
+                callback(null, curTime);
+            });
         });
     });
 };
@@ -106,7 +118,7 @@ timeSchema.statics.getWorldTime = function(callback){
                 callback(null);
             }
             // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента ускорения времени.
-            var worldSeconds = (curTime.lastWorldTime * config.params.calendar.worldTimeKoef) / 1000;
+            var worldSeconds = (curTime.lastWorldTime * config.params.calendar.worldCalendarKoef) / 1000;
             var sec = worldSeconds;
             var worldTime = {};
             var periods = config.params.calendar.periods;
