@@ -14,7 +14,7 @@ var configSchema = new Schema({
     params: Schema.Types.Mixed
 });
 
-timeSchema.statics.setTime = function(newTime, deltaTime, callback){
+timeSchema.statics.setTime = function(firstDelta, callback){
     var timeSettings = this;
     configSettings = mongoose.model('configSettings', configSchema, 'settings');
     configSettings.getConfig(function(err, config) {
@@ -34,9 +34,12 @@ timeSchema.statics.setTime = function(newTime, deltaTime, callback){
             if (!curTime) {
                 curTime = new timeSettings({settingType: "time"});
             }
-            curTime.lastServerTime = newTime;
-            var deltaWorldTime = ((newTime - deltaTime) - curTime.lastWorldTime) * config.params.worldTimeSpeedKoef;
+
+            var nowTime = Date.now();
+            var deltaTime = (nowTime - curTime.lastServerTime) - firstDelta;
+            var deltaWorldTime = deltaTime * config.params.worldTimeSpeedKoef;
             curTime.lastWorldTime = +curTime.lastWorldTime + deltaWorldTime;
+            curTime.lastServerTime = nowTime;
             curTime.save(function (err) {
                 if (err) {
                     log.err(err);

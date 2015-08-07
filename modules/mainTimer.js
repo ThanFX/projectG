@@ -10,12 +10,13 @@ module.exports = function(){
         if(err){
             log.err(err);
         }
-        var deltaTime = Date.now() - curTime.lastWorldTime;
+        var firstDelta = Date.now() - curTime.lastServerTime;
         var mainTimer = function() {
-            timeSettings.setTime(Date.now(), deltaTime, function(err, curTime){
+            timeSettings.setTime(firstDelta, function(err, curTime){
                 if(err){
                     log.err(err);
                 }
+                firstDelta = 0;
                 setTimeout(mainTimer, 1000);
             });
         };

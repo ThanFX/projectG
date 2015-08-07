@@ -30,6 +30,11 @@ env: DEBUG=socket.io:* node index.js
     "lastServerTime" : "1438882715770",
     "lastWorldTime" : "36342610631"
 }
+    "lastServerTime" : "1438967022843",
+    "lastWorldTime" : "36342060615"
+
+
+
 Сейчас 8 день 1 декады 1 месяца 14 года, 14:02
 
 person {
