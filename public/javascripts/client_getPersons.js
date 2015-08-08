@@ -12,6 +12,7 @@ socket.on('persons', function(persons){
                             '<div class="fatigue" data-title="Усталость"></div>' +
                             '<div class="hunger" data-title="Голод"></div>' +
                             '<div class="thirst" data-title="Жажда"></div>' +
+                            '<div class="somnolency" data-title="Сонливость"></div>' +
                         '</div>' +
                     '</div>';
 
@@ -39,6 +40,7 @@ socket.on('persons', function(persons){
         personDiv.querySelector(".fatigue").innerHTML = persons[i].characterisitics.item[3].value + '%';
         personDiv.querySelector(".hunger").innerHTML = persons[i].characterisitics.item[4].value + '%';
         personDiv.querySelector(".thirst").innerHTML = persons[i].characterisitics.item[5].value + '%';
+        personDiv.querySelector(".somnolency").innerHTML = persons[i].characterisitics.item[6].value + '%';
     }
 
 

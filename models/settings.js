@@ -39,6 +39,7 @@ timeSchema.statics.setTime = function(firstDelta, callback){
             var deltaTime = (nowTime - curTime.lastServerTime) - firstDelta;
             var deltaWorldTime = deltaTime * config.params.worldTimeSpeedKoef;
             curTime.lastWorldTime = +curTime.lastWorldTime + deltaWorldTime;
+
             curTime.lastServerTime = nowTime;
             curTime.save(function (err) {
                 if (err) {

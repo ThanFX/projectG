@@ -59,5 +59,7 @@ app.use(function(err, req, res, next) {
 
 // Start main world timer
 mainTimer();
+var checkStates = require('./modules/personStates')();
+
 
 module.exports = app;

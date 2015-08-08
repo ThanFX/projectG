@@ -11,16 +11,26 @@ var rand = function (min, max) {
 };
 
 
+
+/*
+//Добавление в характеристики всех персонажей новой характеристики
 Person.getPersonCh('*', function(err, persons){
     if(err){
         log.error(err);
     }
-    for(var i = 0; i < persons.length; i++){
-        console.log('{ _id: ' + persons[i]._id + ' | ' + persons[i].name + ' | ' + persons[i].job);
-        console.log(persons[i].characteristics);
-    }
+    async.each(persons,
+        function(person, personCallback){
+            person.characterisitics.item.push({name: "Сонливость", value: "0"});
+            Chars.upsertPCh(person._id, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function(err, ch){
+                if(err){
+                    log.error(err);
+                }
+                personCallback(null);
+            });
+        }
+    );
 });
-
+*/
 
 //var worldDate = function(){
 //    timeSettings.getWorldTime(function(err, worldTime){

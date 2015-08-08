@@ -31,13 +31,13 @@ body {
     width: 66.7%;
 }
 
-.health, .fatigue, .hunger {
-    width: 25%;
+.health, .fatigue, .hunger, .thirst {
+    width: 20%;
 }
 
 .attributes>div {
     position: relative;
-    min-width: 70px;
+    min-width: 55px;
 }
 
 .attributes>div:hover::after {

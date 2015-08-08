@@ -24,6 +24,7 @@ var schema = new Schema({
 
 schema.statics.upsertPCh = function(personId, state, characteristics, location, callback){
     var Ch = this;
+    var Person = require('../models/person').Person;
     Person.isPerson({_id: personId}, function(err, person){
         if(err){
             callback(err);
@@ -42,12 +43,10 @@ schema.statics.upsertPCh = function(personId, state, characteristics, location, 
                 if(characteristics){
                     values.item = characteristics;
                     values.markModified('item');
-                    //console.log(values.item);
                 }
                 if(location){
                     values.location = location;
                     values.markModified('location');
-                    //console.log(values.location);
                 }
                 
                 values.save(function(err, pch){
