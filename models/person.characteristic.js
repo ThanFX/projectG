@@ -16,13 +16,14 @@ var schema = new Schema({
         y: Number
     },
     state: String,
+    lastCheckTime: String,
     created: {
         type: Date,
         default: Date.now
     }
 });
 
-schema.statics.upsertPCh = function(personId, state, characteristics, location, callback){
+schema.statics.upsertPCh = function(personId, lastCheckTime, state, characteristics, location, callback){
     var Ch = this;
     var Person = require('../models/person').Person;
     Person.isPerson({_id: personId}, function(err, person){
@@ -40,6 +41,9 @@ schema.statics.upsertPCh = function(personId, state, characteristics, location, 
                 if(state){
                     values.state = state;
                 }
+                if(lastCheckTime){
+                    values.lastCheckTime = lastCheckTime;
+                }
                 if(characteristics){
                     values.item = characteristics;
                     values.markModified('item');
@@ -48,7 +52,7 @@ schema.statics.upsertPCh = function(personId, state, characteristics, location, 
                     values.location = location;
                     values.markModified('location');
                 }
-                
+                console.log(person);
                 values.save(function(err, pch){
                     if(err){
                         callback(err);

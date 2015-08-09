@@ -12,7 +12,7 @@ var rand = function (min, max) {
 
 
 
-/*
+
 //Добавление в характеристики всех персонажей новой характеристики
 Person.getPersonCh('*', function(err, persons){
     if(err){
@@ -20,17 +20,23 @@ Person.getPersonCh('*', function(err, persons){
     }
     async.each(persons,
         function(person, personCallback){
-            person.characterisitics.item.push({name: "Сонливость", value: "0"});
-            Chars.upsertPCh(person._id, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function(err, ch){
+            person.characterisitics.lastCheckTime = '1';
+
+            Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function(err, ch){
                 if(err){
+                    console.log(err);
                     log.error(err);
                 }
-                personCallback(null);
+                console.log(ch);
+                personCallback(null, ch);
             });
+        },
+        function(){
+            console.log('Обновление завершено!');
         }
     );
 });
-*/
+
 
 //var worldDate = function(){
 //    timeSettings.getWorldTime(function(err, worldTime){
