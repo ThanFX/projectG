@@ -121,7 +121,7 @@ timeSchema.statics.getWorldTime = function(callback){
                 log.err("Ошибка загрузки времени");
                 callback(null);
             }
-            // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента ускорения времени.
+            // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента календаря.
             var worldSeconds = (curTime.lastWorldTime * config.params.calendar.worldCalendarKoef) / 1000;
             var sec = worldSeconds;
             var worldTime = {};
@@ -141,6 +141,7 @@ timeSchema.statics.getWorldTime = function(callback){
                     worldTime[period.periodLabel] += +period.minValue;
                 }
             });
+            worldTime.milliseconds = curTime.lastWorldTime;
             callback(null, worldTime);
         });
     });

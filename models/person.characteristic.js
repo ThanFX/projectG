@@ -52,7 +52,6 @@ schema.statics.upsertPCh = function(personId, lastCheckTime, state, characterist
                     values.location = location;
                     values.markModified('location');
                 }
-                console.log(person);
                 values.save(function(err, pch){
                     if(err){
                         callback(err);

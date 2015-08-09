@@ -20,14 +20,12 @@ Person.getPersonCh('*', function(err, persons){
     }
     async.each(persons,
         function(person, personCallback){
-            person.characterisitics.lastCheckTime = '1';
-
+            person.characterisitics.state = 'Сон';
             Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function(err, ch){
                 if(err){
                     console.log(err);
                     log.error(err);
                 }
-                console.log(ch);
                 personCallback(null, ch);
             });
         },

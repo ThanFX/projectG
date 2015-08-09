@@ -23,6 +23,9 @@
 
 env: DEBUG=socket.io:* node index.js
 
+36347388458 - 5:57
+
+
 person {
     "_id" : ObjectId("55913fe453470d6216a7f6f5"),
     "name" : "Персонаж №0",
