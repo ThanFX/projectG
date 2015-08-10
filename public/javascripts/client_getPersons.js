@@ -1,5 +1,4 @@
 socket.on('persons', function(persons){
-    console.log(persons);
     var rowDiv = '<div class="row-person"></div>';
     var personDiv = '<div class="person" id="person-1">' +
                         '<div class="name"></div>' +
@@ -8,11 +7,11 @@ socket.on('persons', function(persons){
                             '<div class="location"></div>' +
                         '</div>' +
                         '<div class="attributes">' +
-                            '<div class="health" data-title="Здоровье"></div>' +
-                            '<div class="fatigue" data-title="Усталость"></div>' +
-                            '<div class="hunger" data-title="Голод"></div>' +
-                            '<div class="thirst" data-title="Жажда"></div>' +
-                            '<div class="somnolency" data-title="Сонливость"></div>' +
+                            '<div class="health"></div>' +
+                            '<div class="fatigue"></div>' +
+                            '<div class="hunger"></div>' +
+                            '<div class="thirst"></div>' +
+                            '<div class="somnolency"></div>' +
                         '</div>' +
                     '</div>';
 
@@ -30,19 +29,22 @@ socket.on('persons', function(persons){
         }
         isPersonCreated = true;
     }
-    for (var i = 0; i < persons.length; i++){
-        var personDiv = document.getElementById(persons[i].id);
-        personDiv.querySelector(".name").innerHTML = persons[i].name;
-        personDiv.querySelector(".state").innerHTML = persons[i].characterisitics.state;
-        personDiv.querySelector(".location").innerHTML = 'x: ' + persons[i].characterisitics.location.x +
+
+    for (i = 0; i < persons.length; i++){
+        var personDivCh = document.getElementById(persons[i].id);
+        personDivCh.querySelector(".name").innerHTML = persons[i].name;
+        personDivCh.querySelector(".state").innerHTML = persons[i].characterisitics.state;
+        personDivCh.querySelector(".location").innerHTML = 'x: ' + persons[i].characterisitics.location.x +
         ', y: ' + persons[i].characterisitics.location.y;
-        personDiv.querySelector(".health").innerHTML = persons[i].characterisitics.item[0].value + '%';
-        personDiv.querySelector(".fatigue").innerHTML = persons[i].characterisitics.item[3].value + '%';
-        personDiv.querySelector(".hunger").innerHTML = persons[i].characterisitics.item[4].value + '%';
-        personDiv.querySelector(".thirst").innerHTML = persons[i].characterisitics.item[5].value + '%';
-        personDiv.querySelector(".somnolency").innerHTML = persons[i].characterisitics.item[6].value + '%';
+        personDivCh.querySelector(".health").innerHTML = persons[i].characterisitics.item.health.value + '%';
+        personDivCh.querySelector(".health").setAttribute('data-title', persons[i].characterisitics.item.health.title);
+        personDivCh.querySelector(".fatigue").innerHTML = persons[i].characterisitics.item.fatigue.value + '%';
+        personDivCh.querySelector(".fatigue").setAttribute('data-title', persons[i].characterisitics.item.fatigue.title);
+        personDivCh.querySelector(".hunger").innerHTML = persons[i].characterisitics.item.hunger.value + '%';
+        personDivCh.querySelector(".hunger").setAttribute('data-title', persons[i].characterisitics.item.hunger.title);
+        personDivCh.querySelector(".thirst").innerHTML = persons[i].characterisitics.item.thirst.value + '%';
+        personDivCh.querySelector(".thirst").setAttribute('data-title', persons[i].characterisitics.item.thirst.title);
+        personDivCh.querySelector(".somnolency").innerHTML = persons[i].characterisitics.item.somnolency.value + '%';
+        personDivCh.querySelector(".somnolency").setAttribute('data-title', persons[i].characterisitics.item.somnolency.title);
     }
-
-
-
 });

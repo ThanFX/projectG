@@ -20,8 +20,54 @@ Person.getPersonCh('*', function(err, persons){
     }
     async.each(persons,
         function(person, personCallback){
-            person.characterisitics.state = 'Сон';
-            Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function(err, ch){
+            //person.characterisitics.state = 'Сон';
+            /*
+            var p = {
+                health:
+                {
+                    title: 'Здоровье',
+                    value: person.characterisitics.item[0].value,
+                    lastChangeTime: '1'
+                },
+                strength:
+                {
+                    title: 'Сила',
+                    value: person.characterisitics.item[1].value,
+                    lastChangeTime: '1'
+                },
+                durability:
+                {
+                    title: 'Выносливость',
+                    value: person.characterisitics.item[2].value,
+                    lastChangeTime: '1'
+                },
+                fatigue:
+                {
+                    title: 'Усталость',
+                    value: person.characterisitics.item[3].value,
+                    lastChangeTime: '1'
+                },
+                hunger:
+                {
+                    title: 'Голод',
+                    value: person.characterisitics.item[4].value,
+                    lastChangeTime: '1'
+                },
+                thirst:
+                {
+                    title: 'Жажда',
+                    value: person.characterisitics.item[5].value,
+                    lastChangeTime: '1'
+                },
+                somnolency:
+                {
+                    title: 'Сонливость',
+                    value: person.characterisitics.item[6].value,
+                    lastChangeTime: '1'
+                }
+            };
+            */
+            Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, p, person.characterisitics.location, function(err, ch){
                 if(err){
                     console.log(err);
                     log.error(err);

@@ -6,11 +6,7 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({
     personId: Schema.ObjectId,
-    item: [{
-        _id: false,
-        name: String,
-        value: Number
-    }],
+    item: Schema.Types.Mixed,
     location: {
         x: Number,
         y: Number
@@ -44,14 +40,16 @@ schema.statics.upsertPCh = function(personId, lastCheckTime, state, characterist
                 if(lastCheckTime){
                     values.lastCheckTime = lastCheckTime;
                 }
+
                 if(characteristics){
                     values.item = characteristics;
-                    values.markModified('item');
+                    values.markModified('items');
                 }
                 if(location){
                     values.location = location;
                     values.markModified('location');
                 }
+                console.log(values);
                 values.save(function(err, pch){
                     if(err){
                         callback(err);

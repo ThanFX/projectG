@@ -21,6 +21,7 @@ module.exports = function() {
         var checkStatePeriod = Math.floor((curConfig.params.checkPeriods.checkStatesEveryMinutes * 60) /
                             (curConfig.params.worldTimeSpeedKoef * curConfig.params.calendar.worldCalendarKoef));
         var agendaCheckStatePeriod = checkStatePeriod + ' seconds';
+        console.log('Agenda должна запускаться каждые ' + agendaCheckStatePeriod);
         /*
         agenda.define('Self-checking',
             function(job, done){
@@ -45,7 +46,7 @@ module.exports = function() {
                             }
                             async.each(persons,
                                 function(person, personCallback){
-                                    if((person.characterisitics.state == 'Сон') && (person.characterisitics.item[3].value < 20)) {
+                                    if((person.characterisitics.state == 'Сон') /*&& (person.characterisitics.item[3].value < 20)*/) {
                                         person.characterisitics.state = 'Активен';
                                         person.characterisitics.lastCheckTime = worldTime.milliseconds;
                                         Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function (err, ch) {
@@ -64,14 +65,14 @@ module.exports = function() {
                             );
                         });
                     }
-                    if((+worldTime.hour >= 22) && (+worldTime.hour < 6)){
+                    if((+worldTime.hour >= 22) || (+worldTime.hour < 6)){
                         Person.getPersonCh('*', function(err, persons){
                             if(err){
                                 log.error(err);
                             }
                             async.each(persons,
                                 function(person, personCallback){
-                                    if((person.characterisitics.state == 'Активен') && (person.characterisitics.item[3].value > 10)) {
+                                    if((person.characterisitics.state == 'Активен') /*&& (person.characterisitics.item[3].value > 10)*/) {
                                         person.characterisitics.state = 'Сон';
                                         person.characterisitics.lastCheckTime = worldTime.milliseconds;
                                         Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, person.characterisitics.item, person.characterisitics.location, function (err, ch) {
