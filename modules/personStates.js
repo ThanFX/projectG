@@ -60,7 +60,6 @@ module.exports = function() {
                                 },
                                 function(){
                                     console.log('Всех разбудили');
-                                    io.emitPersons('*');
                                 }
                             );
                         });
