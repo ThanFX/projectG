@@ -3,7 +3,7 @@ var mongoose = require('../libs/mongoose');
 var async = require('async');
 var crypto = require('crypto');
 var Schema = mongoose.Schema;
-var personCh = require('../models/person.characteristic').PersonCh;
+
 
 var schema = new Schema({
     name: String,
@@ -41,7 +41,7 @@ schema.statics.createPerson = function(person, callback) {
         type: person.skills.type,
         level: person.skills.level
     };
-    
+    npc.skills.push(skill);
     npc.markModified('skills');
     npc.save(function(err){
         if (err){
@@ -54,6 +54,7 @@ schema.statics.createPerson = function(person, callback) {
 
 schema.statics.getPersonCh = function(query, callback){
     var Person = this;
+    var personCh = require('../models/person.characteristic').PersonCh;
     Person.find(query, function(err, persons){
         if(err){
             log.error(err);

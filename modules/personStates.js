@@ -16,8 +16,14 @@ module.exports = function() {
         }
         var checkStatePeriod = Math.floor((curConfig.params.checkPeriods.checkStatesEveryMinutes * 60) /
                             (curConfig.params.worldTimeSpeedKoef * curConfig.params.calendar.worldCalendarKoef));
+
+        var checkLifePeriod = Math.floor((curConfig.params.checkPeriods.checkLifeEveryMinutes * 60) /
+        (curConfig.params.worldTimeSpeedKoef * curConfig.params.calendar.worldCalendarKoef));
+
         var agendaCheckStatePeriod = checkStatePeriod + ' seconds';
-        console.log('Agenda должна запускаться каждые ' + agendaCheckStatePeriod);
+        var agendaCheckLifePeriod = checkLifePeriod + ' seconds';
+        console.log('Проверка состояний должна запускаться каждые ' + agendaCheckStatePeriod);
+        console.log('Проверка жизненных характеристик должна запускаться каждые ' + agendaCheckLifePeriod);
         /*
         agenda.define('Self-checking',
             function(job, done){
@@ -26,6 +32,31 @@ module.exports = function() {
             }
         );
         */
+
+        agenda.define('changeLifePersonState',
+            function(job, done){
+
+                timeSettings.getWorldTime(function(err, worldTime){
+                    if(err){
+                        console.log(err);
+                        log.error(err);
+                    }
+                    console.log("Начинаем голодание");
+                    Chars.find().forEach(function(doc){
+                        Chars.update({_id:"5592371d3c0344852e94f751"}, {"doc.item.hunger.lastChangeTime": worldTime.milliseconds, "doc.item.hunger.value": "doc.item.strenght.value"}, {multi: true}, function(err){
+                            if(err) {
+                                console.log(err);
+                                log.error(err);
+                            } else {
+                                console.log("Чуть-чуть проголодались");
+                                done();
+                            }
+                        });
+                    });
+                });
+            }
+        );
+
 
         agenda.define('changePersonState',
             function(job, done){
@@ -36,31 +67,33 @@ module.exports = function() {
                     }
                     console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
                     if(+worldTime.hour >= 6){
-                        Chars.update({state:"Сон"}, {state:"Активен", lastCheckTime = worldTime.milliseconds}, {multi: true}, function(err){
+                        Chars.update({state:"Сон"}, {state:"Активен", lastCheckTime: worldTime.milliseconds}, {multi: true}, function(err){
                             if(err){
                                 console.log(err);
                                 log.error(err);
                             } else {
                                 console.log('Разбудили спящих');
+                                done();
                             }
                         });
                     }
                     if((+worldTime.hour >= 22) || (+worldTime.hour < 6)){
-                        Chars.update({state:"Активен"}, {state:"Сон", lastCheckTime = worldTime.milliseconds}, {multi: true}, function(err){
+                        Chars.update({state:"Активен"}, {state:"Сон", lastCheckTime: worldTime.milliseconds}, {multi: true}, function(err){
                             if(err){
                                 console.log(err);
                                 log.error(err);
                             } else {
                                 console.log('Усыпили бодрствующих');
+                                done();
                             }
                         });
                     }
                 });
-                done();
             }
         );
 
         agenda.every(agendaCheckStatePeriod, 'changePersonState');
+        agenda.every(agendaCheckLifePeriod, 'changeLifePersonState');
         agenda.start();
     });
 };
