@@ -10,9 +10,15 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function(err){
+    if(err){
+        console.log(err);
+    } else {
+        console.log('Обновили');
+    }
+});
 
-
-
+/*
 //Добавление в характеристики всех персонажей новой характеристики
 Person.getPersonCh('*', function(err, persons){
     if(err){
@@ -67,6 +73,7 @@ Person.getPersonCh('*', function(err, persons){
                 }
             };
             */
+            /*
             Chars.upsertPCh(person._id, person.characterisitics.lastCheckTime, person.characterisitics.state, p, person.characterisitics.location, function(err, ch){
                 if(err){
                     console.log(err);
@@ -80,7 +87,7 @@ Person.getPersonCh('*', function(err, persons){
         }
     );
 });
-
+*/
 
 //var worldDate = function(){
 //    timeSettings.getWorldTime(function(err, worldTime){
