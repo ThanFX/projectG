@@ -32,7 +32,7 @@ module.exports = function() {
             }
         );
         */
-
+/*
         agenda.define('changeLifePersonState',
             function(job, done){
 
@@ -56,7 +56,7 @@ module.exports = function() {
                 });
             }
         );
-
+*/
 
         agenda.define('changePersonState',
             function(job, done){
@@ -93,7 +93,7 @@ module.exports = function() {
         );
 
         agenda.every(agendaCheckStatePeriod, 'changePersonState');
-        agenda.every(agendaCheckLifePeriod, 'changeLifePersonState');
+        //agenda.every(agendaCheckLifePeriod, 'changeLifePersonState');
         agenda.start();
     });
 };
