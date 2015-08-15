@@ -8,17 +8,24 @@ var config = require('../config/index.js');
 var Agenda = require('agenda');
 
 module.exports = function() {
-    var agenda = new Agenda({db: { address: config.get('mongoose:uri')}});
+    var agenda = new Agenda({db: { address: config.get('mongoose:uri-v3')}});
+
+    agenda.cancel({name: 'changeLifePersonState'}, function(){
+        console.log('Отменили старое задание changeLifePersonState');
+    });
+    agenda.cancel({name: 'changePersonState'}, function(){
+        console.log('Отменили старое задание changePersonState');
+    });
 
     configSettings.getConfig(function (err, curConfig) {
         if (err) {
             log.error(err);
         }
-        var checkStatePeriod = Math.floor((curConfig.params.checkPeriods.checkStatesEveryMinutes * 60) /
-                            (curConfig.params.worldTimeSpeedKoef * curConfig.params.calendar.worldCalendarKoef));
+        var checkStatePeriod = Math.floor((+curConfig.params.checkPeriods.checkStatesEveryMinutes * 60) /
+                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
-        var checkLifePeriod = Math.floor((curConfig.params.checkPeriods.checkLifeEveryMinutes * 60) /
-        (curConfig.params.worldTimeSpeedKoef * curConfig.params.calendar.worldCalendarKoef));
+        var checkLifePeriod = Math.floor((+curConfig.params.checkPeriods.checkLifeEveryMinutes * 60) /
+        (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
         var agendaCheckStatePeriod = checkStatePeriod + ' seconds';
         var agendaCheckLifePeriod = checkLifePeriod + ' seconds';
@@ -32,7 +39,7 @@ module.exports = function() {
             }
         );
         */
-/*
+
         agenda.define('changeLifePersonState',
             function(job, done){
 
@@ -41,22 +48,52 @@ module.exports = function() {
                         console.log(err);
                         log.error(err);
                     }
-                    console.log("Начинаем голодание");
-                    Chars.find().forEach(function(doc){
-                        Chars.update({_id:"5592371d3c0344852e94f751"}, {"doc.item.hunger.lastChangeTime": worldTime.milliseconds, "doc.item.hunger.value": "doc.item.strenght.value"}, {multi: true}, function(err){
-                            if(err) {
-                                console.log(err);
-                                log.error(err);
-                            } else {
-                                console.log("Чуть-чуть проголодались");
-                                done();
+                    console.log("Начинаем обновляться");
+                    // Грязный хак, 5000 миллисекунд мира в одной минуте
+                    var worldMinute = 5000;
+
+                    // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
+                    var firstPeriodStart = +worldTime.milliseconds - (worldMinute * 120);
+                    var firstPeriodEnd = +worldTime.milliseconds - (worldMinute * 60);
+
+                    var firstSleepPeriodQuery = {
+                        $and: [
+                            {
+                                state: 'Сон'
+                            },
+                            {
+                                "item.lastChangeLifeTime": {
+                                    $lte: firstPeriodEnd
+                                }
+                            },
+                            {
+                                "item.lastChangeLifeTime": {
+                                    $gt: firstPeriodStart
+                                }
                             }
-                        });
+                        ]
+                    };
+                    var firstSleepPeriodUpdate = {
+                        "item.lastChangeLifeTime": +worldTime.milliseconds,
+                        $inc: {
+                            "item.hunger.value": 1
+                        }
+                    };
+
+                    Chars.update(firstSleepPeriodQuery, firstSleepPeriodUpdate, {multi: true}, function(err, row){
+                        if(err) {
+                            console.log(err);
+                            log.error(err);
+                        } else {
+                            console.log("Обновили первых спящих: ");
+                            console.log(row);
+                            done();
+                        }
                     });
                 });
             }
         );
-*/
+
 
         agenda.define('changePersonState',
             function(job, done){
@@ -92,8 +129,8 @@ module.exports = function() {
             }
         );
 
-        agenda.every(agendaCheckStatePeriod, 'changePersonState');
-        //agenda.every(agendaCheckLifePeriod, 'changeLifePersonState');
+        //agenda.every(agendaCheckStatePeriod, 'changePersonState');
+        agenda.every(agendaCheckLifePeriod, 'changeLifePersonState');
         agenda.start();
     });
 };

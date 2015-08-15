@@ -6,7 +6,10 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({
     personId: Schema.ObjectId,
-    item: Schema.Types.Mixed,
+    item: {
+        lastChangeLifeTime: Number,
+        type: Schema.Types.Mixed
+    },
     location: {
         x: Number,
         y: Number

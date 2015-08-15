@@ -15,10 +15,10 @@ module.exports = function(server){
 		        log.err(err);
 		    }
 		    io.emit('worldDate', worldTime);
-		    console.log(worldTime);
 		});
 		setTimeout(emitWorldDate, 5000);
-	})();   
+	})();
+
     (function emitPersons(query){
     	Person.getPersonCh(query, function(err, persons){
         	if(err){
