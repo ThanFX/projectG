@@ -4,14 +4,14 @@ var configSettings = require('../models/settings').configSettings;
 //var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
 var config = require('../config/index.js');
-//var async = require('async');
+var async = require('async');
 var Agenda = require('agenda');
 
-module.exports = function() {
+module.exports = function(cb) {
     var agenda = new Agenda({db: { address: config.get('mongoose:uri-v3')}});
 
-    agenda.cancel({name: 'changeLifePersonState'}, function(){
-        console.log('Отменили старое задание changeLifePersonState');
+    agenda.cancel({name: 'changeHTS'}, function(){
+        console.log('Отменили старое задание changeHTS');
     });
     agenda.cancel({name: 'changePersonState'}, function(){
         console.log('Отменили старое задание changePersonState');
@@ -20,117 +20,327 @@ module.exports = function() {
     configSettings.getConfig(function (err, curConfig) {
         if (err) {
             log.error(err);
+            console.log(err);
+            cb(err);
         }
+
+        function updatePersons(query, doc, options, callback){
+            Chars.update(query, doc, options, function(err, row){
+                if(err) {
+                    return callback(err);
+                } else {
+                    console.log(row);
+                    callback(null, row);
+                }
+            });
+        }
+
+        // Грязный хак, 5000 миллисекунд мира в одной минуте
+        var worldMinute = 5000;
+
+        var options = {
+            multi: true
+        };
+
         var checkStatePeriod = Math.floor((+curConfig.params.checkPeriods.checkStatesEveryMinutes * 60) /
                             (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
-        var checkLifePeriod = Math.floor((+curConfig.params.checkPeriods.checkLifeEveryMinutes * 60) /
+        var checkHTSPeriod = Math.floor((+curConfig.params.checkPeriods.checkHTSEveryMinutes * 60) /
+        (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+
+        var checkEatDrinkPeriod = Math.floor((+curConfig.params.checkPeriods.checkEatDrinkEveryMinutes * 60) /
         (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
         var agendaCheckStatePeriod = checkStatePeriod + ' seconds';
-        var agendaCheckLifePeriod = checkLifePeriod + ' seconds';
+        var agendaCheckHTSPeriod = checkHTSPeriod + ' seconds';
+        var agendaCheckEatDrinkPeriod = checkEatDrinkPeriod + ' seconds';
+
         console.log('Проверка состояний должна запускаться каждые ' + agendaCheckStatePeriod);
-        console.log('Проверка жизненных характеристик должна запускаться каждые ' + agendaCheckLifePeriod);
-        /*
-        agenda.define('Self-checking',
-            function(job, done){
-                console.log('Agenda должна запускаться каждые ' + agendaCheckStatePeriod + '. Сейчас ' + Date.now());
-                done();
-            }
-        );
-        */
+        console.log('Проверка жизненных характеристик должна запускаться каждые ' + agendaCheckHTSPeriod);
+        console.log('Проверка на кормление и поение должна запускаться каждые ' + agendaCheckEatDrinkPeriod);
 
-        agenda.define('changeLifePersonState',
-            function(job, done){
+        /* Обновляем жизненные характеристики персонажей - голод, жажду и сонливость. Сейчас захардкожены следующие коэффициенты (в час):
+         *      голод: +0,5 во сне, +1 при бодрствовании
+         *      жажда: +1 всегда
+         *      сонливость: -4 во сне, +2 при бодрствовании
+         * При изменении показателей берем только тех персонажей, у которых с момента последнего изменения прошло от 1 до 2 часов.
+         * Если больше 2 часов - трогаем ToDo! Написать отдельную проверку на них и прогонять при запуске сервера!
+         */
 
+        agenda.define('changeHTS',
+            function(job, done){
                 timeSettings.getWorldTime(function(err, worldTime){
                     if(err){
                         console.log(err);
                         log.error(err);
+                        cb(err);
                     }
-                    console.log("Начинаем обновляться");
-                    // Грязный хак, 5000 миллисекунд мира в одной минуте
-                    var worldMinute = 5000;
 
                     // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
-                    var firstPeriodStart = +worldTime.milliseconds - (worldMinute * 120);
-                    var firstPeriodEnd = +worldTime.milliseconds - (worldMinute * 60);
+                    var periodStart = +worldTime.milliseconds - (worldMinute * 120);
+                    var periodEnd = +worldTime.milliseconds - (worldMinute * 55);
 
-                    var firstSleepPeriodQuery = {
+                    var HTSFirstSleepQuery = {
                         $and: [
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $lte: periodEnd
+                                }
+                            },
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $gt: periodStart
+                                }
+                            },
                             {
                                 state: 'Сон'
                             },
                             {
-                                "item.lastChangeLifeTime": {
-                                    $lte: firstPeriodEnd
-                                }
-                            },
-                            {
-                                "item.lastChangeLifeTime": {
-                                    $gt: firstPeriodStart
+                                "item.somnolency.value": {
+                                    $lt: 4.0
                                 }
                             }
                         ]
                     };
-                    var firstSleepPeriodUpdate = {
-                        "item.lastChangeLifeTime": +worldTime.milliseconds,
+                    var HTSFirstSleepUpdate = {
+                        "item.lastChangeHTSTime": +worldTime.milliseconds,
                         $inc: {
-                            "item.hunger.value": 1
+                            "item.hunger.value": 0.5,
+                            "item.thirst.value": 1.0
+                        },
+                        $set: {
+                            "item.somnolency.value": 0.0
+                        }
+                    };
+                    var HTSSecondSleepQuery = {
+                        $and: [
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $lte: periodEnd
+                                }
+                            },
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $gt: periodStart
+                                }
+                            },
+                            {
+                                state: 'Сон'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $gte: 4.0
+                                }
+                            }
+                        ]
+                    };
+                    var HTSSecondSleepUpdate = {
+                        "item.lastChangeHTSTime": +worldTime.milliseconds,
+                        $inc: {
+                            "item.hunger.value": 0.5,
+                            "item.thirst.value": 1.0,
+                            "item.somnolency.value": -4.0
+                        }
+                    };
+                    var HTSFirstActiveQuery = {
+                        $and: [
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $lte: periodEnd
+                                }
+                            },
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $gt: periodStart
+                                }
+                            },
+                            {
+                                state: 'Активен'
+                            }
+                        ]
+                    };
+                    var HTSFirstActiveUpdate = {
+                        "item.lastChangeHTSTime": +worldTime.milliseconds,
+                        $inc: {
+                            "item.hunger.value": 1.0,
+                            "item.thirst.value": 1.0,
+                            "item.somnolency.value": 2.0
                         }
                     };
 
-                    Chars.update(firstSleepPeriodQuery, firstSleepPeriodUpdate, {multi: true}, function(err, row){
-                        if(err) {
-                            console.log(err);
-                            log.error(err);
-                        } else {
-                            console.log("Обновили первых спящих: ");
-                            console.log(row);
-                            done();
+                    async.series([
+                        function(callback) {
+                            updatePersons(HTSFirstSleepQuery, HTSFirstSleepUpdate, options, callback);
+                        },
+                        function(callback) {
+                            updatePersons(HTSSecondSleepQuery, HTSSecondSleepUpdate, options, callback);
+                        },
+                        function(callback) {
+                            updatePersons(HTSFirstActiveQuery, HTSFirstActiveUpdate, options, callback);
                         }
-                    });
+                        ],
+                        function(err){
+                            if(err){
+                                console.log(err);
+                                log.error(err);
+                                cb(err);
+                            } else {
+                                done();
+                            }
+                        }
+                    );
                 });
             }
         );
 
-
+        /* Обновляем состояния персонажей - сон и бодрствование. Сейчас захардкожены следующие условия:
+         *      пробуждение возможно с 6 утра до 20 вечера при сонливости < 4.0%
+         *      засыпание возможно с 20 вечера до 6 утра при сонливости > 30%
+         */
         agenda.define('changePersonState',
             function(job, done){
                 timeSettings.getWorldTime(function(err, worldTime){
                     if(err){
                         console.log(err);
                         log.error(err);
+                        cb(err);
                     }
+
+                    var stateActiveQuery = {
+                        $and: [
+                            {
+                                state: 'Сон'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $lt: 4.0
+                                }
+                            }
+                        ]
+                    };
+                    var stateActiveUpdate = {
+                        $set: {
+                            "state": 'Активен'
+                        }
+                    };
+
+                    var stateSleepQuery = {
+                        $and: [
+                            {
+                                state: 'Активен'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $gt: 30.0
+                                }
+                            }
+                        ]
+                    };
+                    var stateSleepUpdate = {
+                        $set: {
+                            "state": 'Сон'
+                        }
+                    };
                     console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
-                    if(+worldTime.hour >= 6){
-                        Chars.update({state:"Сон"}, {state:"Активен", lastCheckTime: worldTime.milliseconds}, {multi: true}, function(err){
+                    async.series([
+                        function(callback){
+                            if((+worldTime.hour >= 6) && (+worldTime.hour < 20)){
+                                console.log("Начинаем пробуждение!");
+                                updatePersons(stateActiveQuery, stateActiveUpdate, options, callback);
+                            } else {
+                                callback();
+                            }
+                        },
+                        function(callback){
+                            if((+worldTime.hour >= 20) || (+worldTime.hour < 6)){
+                                console.log("Начинаем усыпление!");
+                                updatePersons(stateSleepQuery, stateSleepUpdate, options, callback);
+                            } else {
+                                callback();
+                            }
+                        }
+                        ],
+                        function(err){
                             if(err){
                                 console.log(err);
                                 log.error(err);
+                                cb(err);
                             } else {
-                                console.log('Разбудили спящих');
                                 done();
                             }
-                        });
-                    }
-                    if((+worldTime.hour >= 22) || (+worldTime.hour < 6)){
-                        Chars.update({state:"Активен"}, {state:"Сон", lastCheckTime: worldTime.milliseconds}, {multi: true}, function(err){
-                            if(err){
-                                console.log(err);
-                                log.error(err);
-                            } else {
-                                console.log('Усыпили бодрствующих');
-                                done();
-                            }
-                        });
-                    }
+                        }
+                    );
                 });
             }
         );
 
-        //agenda.every(agendaCheckStatePeriod, 'changePersonState');
-        agenda.every(agendaCheckLifePeriod, 'changeLifePersonState');
+        /* Если персонаж не спит и уровни голода более 6%, а жажды более 3% - кормим и поим их (обнуляем показатели)
+         *    если песонаж испытывает жажду - поим (обнуляем только показатель жажды)
+         *    если персонаж испытывает голод - кормим и поим (обнуляем оба показателя)
+         */
+        agenda.define('getEatAndDrink',
+            function(job, done){
+                var drinkQuery = {
+                    $and: [
+                        {
+                            state: 'Активен'
+                        },
+                        {
+                            "item.thirst.value": {
+                                $gte: 3.0
+                            }
+                        }
+                    ]
+                };
+                var drinkUpdate = {
+                    $set: {
+                        "item.thirst.value": 0.0
+                    }
+                };
+
+                var eatAndDrinkQuery = {
+                    $and: [
+                        {
+                            state: 'Активен'
+                        },
+                        {
+                            "item.hunger.value": {
+                                $gte: 6.0
+                            }
+                        }
+                    ]
+                };
+                var eatAndDrinkUpdate = {
+                    $set: {
+                        "item.thirst.value": 0.0,
+                        "item.hunger.value": 0.0
+                    }
+                };
+                async.series([
+                        function(callback){
+                            console.log("Кормим и поим!");
+                            updatePersons(eatAndDrinkQuery, eatAndDrinkUpdate, options, callback);
+                        },
+                        function(callback){
+                                console.log("Поим");
+                                updatePersons(drinkQuery, drinkUpdate, options, callback);
+                        }
+                    ],
+                    function(err){
+                        if(err){
+                            console.log(err);
+                            log.error(err);
+                            cb(err);
+                        } else {
+                            done();
+                        }
+                    }
+                );
+            }
+        );
+        agenda.every(agendaCheckStatePeriod, 'changePersonState');
+        agenda.every(agendaCheckHTSPeriod, 'changeHTS');
+        agenda.every(agendaCheckEatDrinkPeriod, 'getEatAndDrink');
         agenda.start();
     });
 };
