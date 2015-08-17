@@ -1,0 +1,87 @@
+{ 
+	"x": 5, 
+	"y": -7, 
+	"chunkId": "55d20fe357ba812cd1096c73", 
+	"isExplored": true,
+	"urban": {
+		"percentArea": 10,
+		"type": "village",
+		"townId": "12314"
+	},
+	"forest": {
+		"percentArea": 10,
+		"type": "",
+		"passability": 0.3,
+		"quality": 1
+	},
+	"field": {
+		"percentArea": 20,
+		"type": "rye",
+		"passability": 0.8,
+		"quality": 1
+	},
+	"meadow": {
+		"percentArea": 10,
+		"type": "grass",
+		"passability": 0.7,
+		"quality": 1
+	},
+	"lake": {
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 1
+	},
+	"swamp": {
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 1
+	},
+	"mountain": {
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 1
+	},
+	"snow": {
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 1
+	},
+	"desert": {
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 1
+	},
+	"hill": {
+		"percentArea": 20,
+		"type": "grass",
+		"passability": 0.7,
+		"quality": 1
+	},
+	"rivers": [
+		{
+			"percentArea": 5,
+			"size" : 10,
+			"direction": "S-N",
+			"isBridge": true,
+			"bridgeSize": 2,
+			"quality": 1
+		}
+	],
+	"roads": [
+		{
+			"size": 3,
+			"direction": "S-N",
+			"onRiver": "left"
+		},
+		{
+			"size": 2,
+			"direction": "E-W",
+			"onRiver": "across"
+		}
+	]
+},

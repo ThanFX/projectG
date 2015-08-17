@@ -8,7 +8,7 @@ var async = require('async');
 var Agenda = require('agenda');
 
 module.exports = function(cb) {
-    var agenda = new Agenda({db: { address: config.get('mongoose:uri-v3')}});
+    var agenda = new Agenda({db: { address: config.get('mongoose:uri')}});
 
     agenda.cancel({name: 'changeHTS'}, function(){
         console.log('Отменили старое задание changeHTS');

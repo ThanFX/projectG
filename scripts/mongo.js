@@ -10,6 +10,21 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+for(var i = -10; i <= 10; i++){
+    for(var j = -10; j <= 10; j++){
+        var p = {
+            "x": i,
+            "y": j,
+            chunkId: "123",
+            isExplored: false
+        };
+        console.log(p);
+        console.log(',');
+    }
+}
+
+
+/*
 Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function(err){
     if(err){
         console.log(err);
@@ -17,6 +32,7 @@ Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function
         console.log('Обновили');
     }
 });
+*/
 
 /*
 //Добавление в характеристики всех персонажей новой характеристики
