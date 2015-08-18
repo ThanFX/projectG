@@ -1,86 +1,102 @@
-{ 
+Чанк имеет размер 1х1 км и может включать в себя любые типы местности.
+x, y - координаты чанка на глобальной карте
+isExplored - булевый признак, доступна ли местность для исследования
+Позже добавится признак опасности чанка
+
+возможные типы местностей - urban, forest, field, meadow, lake, swamp, mountain, snow, desert, rivers, roads
+percentArea - сколько % площади чанка занимает данный тип местности. Логично, что сумма percentArea всех местностей чанка должна всегда составлять 100%
+типы городов - хутор, деревня, село, город, мегаполис, townId - айдишник населенного пункта, onRiver - расположение дороги относительно реки (left, right, top, bottom, across)
+размеры дорог: цифра - ширина в метрах (1 - тропинка, 2 - маленькая проселочная дорога, 3 - тракт, 4 - мощеная дорога масштаба страны, 5 - "императорская")
+размеры рек: цифра - ширина в десятках метров (1 - до 10 м, 2 - 10-20, 3 - 20-30 и т.д.), bridge - признак наличия и размер моста (0 - нету, 1 - пешеходный, 2 - гужевый, 3 - грузы и т.д.)
+направления: S - юг, N - север, E - запад, W - восток, C - центр чанка, onRiver - расположение дороги относительно реки (left, right, top, bottom, across)
+passability - "проходимость" местности - умножается на базовую скорость двигающегося. Для дорог, по умолчанию 1, для рек - 0. Может быть отрицательной (непроходимой) и требовать доп. умений или снаряжения.
+quality - "качество" местности для работ/добычи
+
+Пример:
+{
 	"x": 5, 
 	"y": -7, 
 	"chunkId": "55d20fe357ba812cd1096c73", 
 	"isExplored": true,
 	"urban": {
-		"percentArea": 10,
+		"percentArea": 15,
 		"type": "village",
-		"townId": "12314"
+		"townId": "12314",
+        "onRiver": "across"
 	},
 	"forest": {
-		"percentArea": 10,
+		"percentArea": 15,
 		"type": "",
-		"passability": 0.3,
-		"quality": 1
-	},
-	"field": {
-		"percentArea": 20,
-		"type": "rye",
 		"passability": 0.8,
 		"quality": 1
 	},
+	"field": {
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 0
+	},
 	"meadow": {
-		"percentArea": 10,
-		"type": "grass",
-		"passability": 0.7,
+		"percentArea": 59,
+		"type": "",
+		"passability": 0.9,
 		"quality": 1
 	},
 	"lake": {
 		"percentArea": 0,
 		"type": "",
 		"passability": 0,
-		"quality": 1
+		"quality": 0
 	},
 	"swamp": {
 		"percentArea": 0,
 		"type": "",
 		"passability": 0,
-		"quality": 1
+		"quality": 0
 	},
 	"mountain": {
 		"percentArea": 0,
 		"type": "",
 		"passability": 0,
-		"quality": 1
+		"quality": 0
 	},
 	"snow": {
 		"percentArea": 0,
 		"type": "",
 		"passability": 0,
-		"quality": 1
+		"quality": 0
 	},
 	"desert": {
 		"percentArea": 0,
 		"type": "",
 		"passability": 0,
-		"quality": 1
+		"quality": 0
 	},
 	"hill": {
-		"percentArea": 20,
-		"type": "grass",
-		"passability": 0.7,
-		"quality": 1
+		"percentArea": 0,
+		"type": "",
+		"passability": 0,
+		"quality": 0
 	},
 	"rivers": [
 		{
-			"percentArea": 5,
-			"size" : 10,
-			"direction": "S-N",
-			"isBridge": true,
-			"bridgeSize": 2,
+			"percentArea": 0.5,
+			"size" : 1,
+            "passability": 0,
+			"direction": "E-W",
+			"bridge": 3,
 			"quality": 1
 		}
 	],
 	"roads": [
 		{
-			"size": 3,
-			"direction": "S-N",
-			"onRiver": "left"
-		},
-		{
 			"size": 2,
 			"direction": "E-W",
+			"onRiver": "bottom"
+		},
+		{
+			"size": 3,
+			"direction": "S-N",
 			"onRiver": "across"
 		}
 	]
