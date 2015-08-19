@@ -1,6 +1,6 @@
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
-var async = require('async');
+var Chunks = require('../models/chunk').Chunks;
 var Schema = mongoose.Schema;
 
 var timeSchema = new Schema({
@@ -14,6 +14,82 @@ var configSchema = new Schema({
     params: Schema.Types.Mixed
 });
 
+var worldMapSchema = new Schema({
+    settingType: String,
+    worldMap: []
+});
+
+worldMapSchema.statics.getWorldMapAll = function(callback){
+    var worldMapSettings = this;
+    worldMapSettings.findOne({settingType:"world"}, function(err, worldMap) {
+        if (err) {
+            log.err(err);
+            callback(err);
+        }
+        callback(null, worldMap.worldMap);
+    });
+};
+
+worldMapSchema.statics.setWorldMapAll = function(worldMap, callback){
+    var worldMapSettings = this;
+    worldMapSettings.findOne({settingType: "world"}, function(err, wm){
+        if(err){
+            log.error(err);
+            callback(err);
+        }
+        if(!wm) {
+            wm = new worldMapSettings({settingType: "world"});
+        }
+        wm.worldMap = worldMap;
+        wm.markModified('worldMap');
+        wm.save(function(err){
+            if(err){
+                log.err(err);
+                callback(err);
+            }
+            callback(null, wm.worldMap);
+        });
+    });
+};
+
+/* Функция, заполняющая worldMap из коллекции чанков*/
+worldMapSchema.statics.synchronizeWorld = function(callback){
+    this.getWorldMapAll(function(err, wm){
+        if(err){
+            console.log(err);
+        } else {
+            Chunks.find('*', function(err, chunks){
+                if(err){
+                    console.log(err);
+                } else {
+                    wm.forEach(function(wmItem, i, wm){
+                        // Дибильно, но время уже половина первого ночи и не думается :) При разрастании карты необходим глубокий рефакторинг!
+                        for(var j = 0; j < chunks.length; j++){
+                            if(wmItem.x == chunks[j].x && wmItem.y == chunks[j].y) {
+                                if(chunks[j].isExplored == true) {
+                                    wmItem.isExplored = true;
+                                    wmItem.chunkId = chunks[j]._id;
+                                } else {
+                                    wmItem.isExplored = false;
+                                    wmItem.chunkId = null;
+                                }
+                                console.log(wmItem);
+                            }
+                        }
+                    });
+                    WorldMap.setWorldMapAll(wm, function(err){
+                        if(err){
+                            console.log(err);
+                        } else{
+                            console.log("OK!");
+                        }
+                    });
+                }
+            });
+        }
+    });
+};
+
 timeSchema.statics.setTime = function(firstDelta, callback){
     var timeSettings = this;
     configSettings = mongoose.model('configSettings', configSchema, 'settings');
@@ -26,7 +102,7 @@ timeSchema.statics.setTime = function(firstDelta, callback){
             log.err("Ошибка загрузки конфигурации");
             callback(null);
         }
-        timeSettings.findOne({settingType: "time"}, function (err, curTime) {
+        timeSettings.findOne({settingType: 'time'}, function (err, curTime) {
             if (err) {
                 log.err(err);
                 callback(err);
@@ -96,6 +172,7 @@ configSchema.statics.getConfig = function(callback){
         callback(null, curConfig);
     });
 };
+
 /* Рассчитываем нормальное календарное время мира
 *
 */
@@ -149,3 +226,4 @@ timeSchema.statics.getWorldTime = function(callback){
 
 exports.timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
 exports.configSettings = mongoose.model('configSettings', configSchema, 'settings');
+exports.worldMap = mongoose.model('worldMap', worldMapSchema, 'settings');

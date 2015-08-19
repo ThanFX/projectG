@@ -5,24 +5,12 @@ var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
 var mainTimer = require('../modules/mainTimer')();
+var Chunks = require('../models/chunk').Chunks;
+var WorldMap = require('../models/settings').worldMap;
 
 var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
-
-for(var i = -10; i <= 10; i++){
-    for(var j = -10; j <= 10; j++){
-        var p = {
-            "x": i,
-            "y": j,
-            chunkId: "123",
-            isExplored: false
-        };
-        console.log(p);
-        console.log(',');
-    }
-}
-
 
 /*
 Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function(err){
