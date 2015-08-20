@@ -2,9 +2,11 @@ extends layout
 
 block content
     div.worldDate
+    canvas#canvas
     script(src='/socket.io/socket.io.js')
     script.
         var socket = io('http://localhost:3000');
         var isPersonCreated = false;
     script(src='/javascripts/client_getWorldDate.js')
     script(src='/javascripts/client_getPersons.js')
+    script(src='/javascripts/client_getChunks.js')
