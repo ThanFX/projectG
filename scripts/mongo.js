@@ -12,6 +12,14 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+Chunks.getChunks('*', function(err, chunks){
+    if(err){
+        console.log(err);
+    } else {
+        console.log(chunks);
+    }
+});
+
 /*
 Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function(err){
     if(err){

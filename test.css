@@ -1,46 +1,14 @@
-.person {
-    width: 280px;
-    padding: 5px;
-    border: 1px solid #000000;
-    border-radius: 10px;
-    margin: 10px;
+.container {
+    width: 1200px;
+    margin: 0 auto;
 }
-
-.name {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.general {
-    margin-bottom: 10px;
-}
-
-.general div, .attributes div{
+.container div{
     display: inline-block;
+    border: 1px solid #000000;
+    margin: 1px;
 }
 
-.state {
-    width: 66.7%;
+.map {
+    min-width: 700px;
 }
 
-.health, .fatigue, .hunger {
-    width: 25%;
-}
-
-.attributes>div {
-    position: relative;
-}
-
-.attributes>div:hover::after {
-    content: attr(data-title);
-    position: absolute;
-    left: 30px;
-    top: -10px;
-    z-index: 1;
-    background: rgba(255,255,230,0.9);
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    padding: 5px 10px;
-    border: 1px solid #333;
-    border-radius: 3px;
-}
