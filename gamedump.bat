@@ -1,1 +1,1 @@
-"c:\Program Files\MongoDB\Server\3.0\bin\mongodump.exe" --port 27017 -d game
+"c:\Program Files\MongoDB\Server\3.0\bin\mongodump.exe" --port 27017 -d game --dumpDbUsersAndRoles
