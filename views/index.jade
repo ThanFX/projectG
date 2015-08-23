@@ -2,7 +2,10 @@ extends layout
 
 block content
     div.worldDate
-    canvas#canvas
+    div.container
+        div.map
+            canvas#canvas
+        div.map-info
     script(src='/socket.io/socket.io.js')
     script.
         var socket = io('http://localhost:3000');

@@ -53,3 +53,17 @@ body {
     border: 1px solid #333;
     border-radius: 3px;
 }
+
+.container {
+    width: 1200px;
+    margin: 0 auto;
+}
+.container div{
+    display: inline-block;
+    border: 1px solid #000000;
+    margin: 1px;
+}
+
+.map {
+    min-width: 700px;
+}

@@ -4,7 +4,6 @@ var Chars = require('../models/person.characteristic').PersonCh;
 var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
-var mainTimer = require('../modules/mainTimer')();
 var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
 
@@ -12,6 +11,47 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+
+
+/*
+timeSettings.getWorldTime(function(err, wt){
+    if(err){
+        console.log(err);
+    } else {
+        console.log(wt);
+        timeSettings.getTime(function (err, curTime) {
+            if (err) {
+                log.err(err);
+            }
+            console.log(curTime);
+            console.log(Date.now());
+            console.log(curTime.lastServerTime);
+            var firstDelta = Date.now() - curTime.lastServerTime;
+            console.log(firstDelta);
+            var mainTimer = function () {
+                timeSettings.setTime(firstDelta, function (err, curTime) {
+                    if (err) {
+                        log.err(err);
+                    }
+                    firstDelta = 0;
+                    console.log(curTime);
+                    timeSettings.getWorldTime(function (err1, wt1) {
+                        if (err) {
+                            console.log(err1);
+                        } else {
+                            console.log(wt1);
+                        }
+                    });
+                    //setTimeout(mainTimer, 1000);
+                });
+            };
+            mainTimer();
+        });
+    }
+});
+*/
+
+/*
 Chunks.getChunks('*', function(err, chunks){
     if(err){
         console.log(err);
@@ -19,7 +59,7 @@ Chunks.getChunks('*', function(err, chunks){
         console.log(chunks);
     }
 });
-
+*/
 /*
 Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function(err){
     if(err){
