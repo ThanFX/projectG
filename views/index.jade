@@ -10,6 +10,8 @@ block content
     script.
         var socket = io('http://localhost:3000');
         var isPersonCreated = false;
+        var persons_client;
+        var chunks_client;
     script(src='/javascripts/client_getWorldDate.js')
     script(src='/javascripts/client_getPersons.js')
     script(src='/javascripts/client_getChunks.js')

@@ -1,4 +1,5 @@
 socket.on('chunks', function(chunks){
+    chunks_client = chunks;
 
     var rand = function (min, max) {
         return Math.floor(min + Math.random()*(max +1 - min));
@@ -197,6 +198,15 @@ socket.on('chunks', function(chunks){
         }
     }
 
+    function drawAllPersons(){
+        for(var i = 0; i < personIcons.length; i++){
+            // хардкодим центральный чанк
+            var chunkStartX = startMapX + (2 * chunkWidth);
+            var chunkStartY = startMapY + (2 * chunkHeight);
+            ctx.drawImage(personIcons.icon, chunkStartX + rand(8, 120), chunkStartY + rand(8, 120));
+        }
+    }
+
     var canvas = document.getElementById('canvas');
     canvas.width = 700;
     canvas.height = 700;
@@ -215,4 +225,20 @@ socket.on('chunks', function(chunks){
             drowRoadsAndRivers(i, j);
         }
     }
+
+    var personIcons = [];
+    for(var p = 0; p < persons_client.length; p++){
+        personIcons[i] = {};
+        personIcons[i].icon = new Image();
+        personIcons[i].icon.src = 'images/person-icon.png';
+        personIcons[i].id = persons_client[i]._id;
+        personIcons[i].icon.onclick = showPersonInfo(persons_client[i]._id);
+        personIcons[i].chunk.x = persons_client[i].location.x;
+        personIcons[i].chunk.y = persons_client[i].location.y;
+        personIcons[i].x = 0;
+        personIcons[i].y = 0;
+    }
+    drawAllPersons();
+
 });
+

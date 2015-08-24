@@ -1,4 +1,5 @@
 socket.on('persons', function(persons){
+    persons_client = persons;
     var rowDiv = '<div class="row-person"></div>';
     var personDiv = '<div class="person" id="person-1">' +
                         '<div class="name"></div>' +
