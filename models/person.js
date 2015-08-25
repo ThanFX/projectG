@@ -70,8 +70,8 @@ schema.statics.getPersonCh = function(query, callback){
                     }
                     var p = {
                         // _id - для внутренних нужд
-                        _id: person._id,
-                        id: crypto.createHash('md5').update(person._id + '').digest('hex'),
+                        id: person._id,
+                        idsha: crypto.createHash('md5').update(person._id + '').digest('hex'),
                         name: person.name,
                         job: person.job,
                         skills: person.skills,

@@ -32,20 +32,31 @@ module.exports = function(server){
 		setTimeout(emitWorldDate, 5000);
 	})();
 
-    (function emitPersons(query){
-    	Person.getPersonCh(query, function(err, persons){
-        	if(err){
-            	log.error(err);
-        	}
-    		io.emit('persons', persons);
-    	});
-    	setTimeout(emitPersons, 5000);
-	})('*');
+    //(function emitPersons(query){
+    	//Person.getPersonCh(query, function(err, persons){
+     //   	if(err){
+     //       	log.error(err);
+     //   	}
+    	//	io.emit('persons', persons);
+    	//});
+    	//setTimeout(emitPersons, 5000);
+	//})('*');
+
+    function emitAllPersons(socket){
+        Person.getPersonCh('*', function(err, persons){
+            if(err){
+                log.error(err);
+            }
+            socket.emit('persons', persons);
+        });
+    }
 
     io.on('connection', function(socket){
-        emitChunks(socket);
         socket.on('getChunks', function(){
             emitChunks(socket);
-        })
+        });
+        socket.on('getAllPersons', function(){
+            emitAllPersons(socket);
+        });
     });
 };

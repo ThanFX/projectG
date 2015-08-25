@@ -48,4 +48,11 @@ socket.on('persons', function(persons){
         personDivCh.querySelector(".somnolency").innerHTML = persons[i].characterisitics.item.somnolency.value + '%';
         personDivCh.querySelector(".somnolency").setAttribute('data-title', persons[i].characterisitics.item.somnolency.title);
     }
+
+
+
+    drawAllPersons();
+
+
+
 });

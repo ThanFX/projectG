@@ -5,11 +5,12 @@ var setDisplayTime = function(value){
     }
     return value;
 };
+
 socket.on('worldDate', function(worldDate){
+    worldDate_client = worldDate;
     var wd = document.querySelector('.worldDate');
-    var date = 'Сейчас '+ worldDate.day + ' день ' + worldDate.ten_day +
+    wd.innerHTML = 'Сейчас '+ worldDate.day + ' день ' + worldDate.ten_day +
         ' декады ' + worldDate.month + ' месяца ' + worldDate.year +
         ' года, ' + setDisplayTime(worldDate.hour) + ':' +
         setDisplayTime(worldDate.minute);
-    wd.innerHTML = date;
 });
