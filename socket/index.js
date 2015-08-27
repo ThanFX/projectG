@@ -58,5 +58,15 @@ module.exports = function(server){
         socket.on('getAllPersons', function(){
             emitAllPersons(socket);
         });
+        socket.on('getPerson', function(personId){
+            Person.getPersonCh({_id: personId}, function(err, person) {
+                if (err) {
+                    log.error(err);
+                    console.log(err);
+                } else {
+                    socket.emit('person', person);
+                }
+            });
+        });
     });
 };

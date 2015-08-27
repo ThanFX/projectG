@@ -9,6 +9,10 @@ socket.on('persons', function(persons) {
     drawAllPersons();
 });
 
+socket.on('person', function(person){
+   drawPersonInfo(person);
+});
+
 function getChunks(){
     socket.emit('getChunks', function(chunks){
         //chunks_client = chunks;
@@ -16,9 +20,11 @@ function getChunks(){
 }
 
 function getPersons(){
-    socket.emit('getAllPersons', function(persons){
-        //persons_client = persons;
-    });
+    socket.emit('getAllPersons');
+}
+
+function getPerson(personId){
+    socket.emit('getPerson', personId);
 }
 
 var rand = function (min, max) {
@@ -43,7 +49,7 @@ virtualChunks[1] = [];
 virtualChunks[2] = [];
 virtualChunks[3] = [];
 virtualChunks[4] = [];
-var personIcons = [];
+
 getChunks();
 
 function drawChunks(){
@@ -54,7 +60,7 @@ function drawChunks(){
         for(var j = 0; j < 5; j++){
             ctx.fillStyle = getChunkColor(i, j);
             ctx.fillRect(startMapX + chunkWidth*i, startMapY + chunkHeight*j, chunkWidth, chunkHeight);
-            drowRoadsAndRivers(i, j);
+            drawRoadsAndRivers(i, j);
         }
     }
 }
@@ -96,7 +102,7 @@ function getChunkColor(x, y){
     return chunkColor?chunkColor:'#808080';
 }
 
-function drowRoadsAndRivers(x, y){
+function drawRoadsAndRivers(x, y){
     var dir = {
         "N": {
             "x": chunkWidth/2,
@@ -227,6 +233,7 @@ function createFormattedChunkInfo(chunkId){
 // Крайне неоптимально, но сейчас пофиг
 function showChunkInfo(e){
     //Честные координаты карты, очищенные от всего
+    //ToDo!!! Не работают!! Например, когда консоль внизу или полностью свободный экран!!! Пофиксить - критично!!!
     var mapX = e.pageX - canvas.offsetLeft - startMapX;
     var mapY = e.pageY - canvas.offsetTop - startMapY;
     var virtualChunkX = Math.floor(mapX / 128);
@@ -238,8 +245,43 @@ function showChunkInfo(e){
     }
 }
 
+//Криво до безумия, но пока пофиг!
+function drawPersonInfo(person){
+    var personDiv = '<div class="person-info-text">' +
+        '<div class="name"></div>' +
+        '<div class="general">' +
+        '<div class="state"></div>' +
+        '<div class="location"></div>' +
+        '</div>' +
+        '<div class="attributes">' +
+        '<div class="health"></div>' +
+        '<div class="fatigue"></div>' +
+        '<div class="hunger"></div>' +
+        '<div class="thirst"></div>' +
+        '<div class="somnolency"></div>' +
+        '</div>' +
+        '</div>';
+    var personInfo = document.querySelector('.person-info');
+    personInfo.innerHTML = personDiv;
+    var personDivCh = document.querySelector('.person-info-text');
+    personDivCh.querySelector(".name").innerHTML = person[0].name;
+    personDivCh.querySelector(".state").innerHTML = person[0].characterisitics.state;
+    personDivCh.querySelector(".location").innerHTML = 'x: ' + person[0].characterisitics.location.x +
+    ', y: ' + person[0].characterisitics.location.y;
+    personDivCh.querySelector(".health").innerHTML = person[0].characterisitics.item.health.value + '%';
+    personDivCh.querySelector(".health").setAttribute('data-title', person[0].characterisitics.item.health.title);
+    personDivCh.querySelector(".fatigue").innerHTML = person[0].characterisitics.item.fatigue.value + '%';
+    personDivCh.querySelector(".fatigue").setAttribute('data-title', person[0].characterisitics.item.fatigue.title);
+    personDivCh.querySelector(".hunger").innerHTML = person[0].characterisitics.item.hunger.value + '%';
+    personDivCh.querySelector(".hunger").setAttribute('data-title', person[0].characterisitics.item.hunger.title);
+    personDivCh.querySelector(".thirst").innerHTML = person[0].characterisitics.item.thirst.value + '%';
+    personDivCh.querySelector(".thirst").setAttribute('data-title', person[0].characterisitics.item.thirst.title);
+    personDivCh.querySelector(".somnolency").innerHTML = person[0].characterisitics.item.somnolency.value + '%';
+    personDivCh.querySelector(".somnolency").setAttribute('data-title', person[0].characterisitics.item.somnolency.title);
+}
+
 function showPersonInfo(e){
-    console.log(e.target.id);
+    socket.emit('getPerson', e.target.id);
 }
 
 function drawAllPersons(){
@@ -254,6 +296,6 @@ function drawAllPersons(){
         var mapPersonIcon = mapHTML.appendChild(pIcon);
         mapPersonIcon.style.top = chunkStartY + rand(8, 120) + 'px';
         mapPersonIcon.style.left = chunkStartX + rand(8, 120) + 'px';
-        mapPersonIcon.onclick = showPersonInfo;
+        mapPersonIcon.addEventListener('click', showPersonInfo);
     }
 }

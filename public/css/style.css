@@ -55,11 +55,19 @@ body {
 }
 
 .container {
-    width: 1200px;
+    max-width: 1200px;
     margin: 0 auto;
 }
-.container>div{
+
+.container>div {
     display: inline-block;
+}
+
+.info {
+    max-width: 400px;
+}
+
+.map, .person-info, .map-info{
     border: 1px solid #000000;
     margin: 1px;
 }
