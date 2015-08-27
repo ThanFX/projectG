@@ -58,7 +58,7 @@ body {
     width: 1200px;
     margin: 0 auto;
 }
-.container div{
+.container>div{
     display: inline-block;
     border: 1px solid #000000;
     margin: 1px;
@@ -66,4 +66,18 @@ body {
 
 .map {
     min-width: 700px;
+    position: relative;
+}
+
+.person-icon {
+    position: absolute;
+    background-image: url('../images/person-icon.png');
+    width: 8px;
+    height: 8px;
+}
+
+.person-icon:hover {
+    background-image: url('../images/person-icon-hover.png');
+    width: 8px;
+    height: 8px;
 }

@@ -239,30 +239,21 @@ function showChunkInfo(e){
 }
 
 function showPersonInfo(e){
-    console.log("!!!");
+    console.log(e.target.id);
 }
 
 function drawAllPersons(){
-    console.log("!");
-    for(var i = 0; i < persons_client.length; i++){
-        personIcons[i] = {};
-        personIcons[i].icon = new Image();
-        personIcons[i].icon.src = 'images/person-icon.png';
-        personIcons[i].id = persons_client[i].id;
-        personIcons[i].icon.onmousemove = showPersonInfo;
-        personIcons[i].chunkX = persons_client[i].characterisitics.location.x;
-        personIcons[i].chunkY = persons_client[i].characterisitics.location.y;
-        personIcons[i].x = 0;
-        personIcons[i].y = 0;
-    }
-
-    personIcons[persons_client.length - 1].icon.onload = function(){
-        for(i = 0; i < personIcons.length; i++){
-            // хардкодим центральный чанк
-            var chunkStartX = startMapX + (2 * chunkWidth);
-            var chunkStartY = startMapY + (2 * chunkHeight);
-            //console.log('chunkStartX: ' + chunkStartX + ', chunkStartY: ' + chunkStartY);
-            ctx.drawImage(personIcons[i].icon, chunkStartX + rand(8, 120), chunkStartY + rand(8, 120));
-        }
+    var mapHTML = document.querySelector('.map');
+    // хардкодим центральный чанк
+    var chunkStartX = startMapX + (2 * chunkWidth);
+    var chunkStartY = startMapY + (2 * chunkHeight);
+    for(var i = 0; i < persons_client.length; i++) {
+        var pIcon = document.createElement('div');
+        pIcon.className = 'person-icon';
+        pIcon.id = persons_client[i].id;
+        var mapPersonIcon = mapHTML.appendChild(pIcon);
+        mapPersonIcon.style.top = chunkStartY + rand(8, 120) + 'px';
+        mapPersonIcon.style.left = chunkStartX + rand(8, 120) + 'px';
+        mapPersonIcon.onclick = showPersonInfo;
     }
 }
