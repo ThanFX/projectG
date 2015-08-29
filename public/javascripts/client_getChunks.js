@@ -232,10 +232,11 @@ function createFormattedChunkInfo(chunkId){
 
 // Крайне неоптимально, но сейчас пофиг
 function showChunkInfo(e){
-    //Честные координаты карты, очищенные от всего
+    //Честные координаты карты, очищенные от всего (без учета прокрутки страницы!!!)
+    var canvasRect = canvas.getClientRects();
     //ToDo!!! Не работают!! Например, когда консоль внизу или полностью свободный экран!!! Пофиксить - критично!!!
-    var mapX = e.pageX - canvas.offsetLeft - startMapX;
-    var mapY = e.pageY - canvas.offsetTop - startMapY;
+    var mapX = e.pageX - canvasRect[0].left - startMapX;
+    var mapY = e.pageY - canvasRect[0].top - startMapY;
     var virtualChunkX = Math.floor(mapX / 128);
     var virtualChunkY = Math.floor(mapY / 128);
     if(virtualChunkX >= 0 && virtualChunkX < 5 && virtualChunkY >= 0 && virtualChunkY < 5) {
