@@ -6,12 +6,50 @@ var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
 var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
+var PersonMap = require('../models/personMap').personMap;
 
 var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+// Взяли рыбаков
+Person.getPersonCh({job: "Fishing"}, function(err, person){
+    if(err){
+        console.log(err);
+    } else {
+        console.log(person);
+        //Для первого рыбака ищем чанки с доступной рыбалкой
+        PersonMap.getPersonJobChunk(person.id, person.job, function(err, jobChunks){
+            if(err){
+                console.log(err);
+            } else {
+                // Если таких чанков нет
+                console.log('jobChunks: ' + jobChunks);
+                // Запускаем функцию разведки чанков
+                exploreJobChunk(person.id);
+            }
+        });
+    }
+});
+// Функция рвзведки чанков для работы
+function exploreJobChunk(personId){
+    PersonMap.getPersonMap(personId, function(err, personMap){
+        if(err){
+            console.log(err);
+        } else {
+            // Если вообще нет разведанных чанков - запускаем функцию разведки чанка (без параметров местности - разведка чанка, в котором находится персонаж)
+            if(!personMap || personMap.maps.length == 0){
+                exploreChunk(personId);
+            }
+        }
+    });
+}
+// Функция без параметров местности - разведка чанка, в котором находится персонаж
+function exploreChunk(personId){
+    Person.getPersonCh({personId: personId}, function(err, person){
 
+    })
+}
 
 /*
 timeSettings.getWorldTime(function(err, wt){

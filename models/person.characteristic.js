@@ -7,14 +7,18 @@ var Schema = mongoose.Schema;
 var schema = new Schema({
     personId: Schema.ObjectId,
     item: {
+        _id: false,
         lastChangeHTSTime: Number,
         type: Schema.Types.Mixed
     },
     location: {
+        _id: false,
         x: Number,
         y: Number
     },
     state: String,
+    action: String,
+    stage: String,
     lastCheckTime: String,
     created: {
         type: Date,

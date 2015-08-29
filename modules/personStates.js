@@ -16,6 +16,9 @@ module.exports = function(cb) {
     agenda.cancel({name: 'changePersonState'}, function(){
         console.log('Отменили старое задание changePersonState');
     });
+    agenda.cancel({name: 'getEatAndDrink'}, function(){
+        console.log('Отменили старое задание getEatAndDrink');
+    });
 
     configSettings.getConfig(function (err, curConfig) {
         if (err) {
@@ -93,7 +96,7 @@ module.exports = function(cb) {
                                 }
                             },
                             {
-                                state: 'Сон'
+                                state: 'sleep'
                             },
                             {
                                 "item.somnolency.value": {
@@ -125,7 +128,7 @@ module.exports = function(cb) {
                                 }
                             },
                             {
-                                state: 'Сон'
+                                state: 'sleep'
                             },
                             {
                                 "item.somnolency.value": {
@@ -155,7 +158,7 @@ module.exports = function(cb) {
                                 }
                             },
                             {
-                                state: 'Активен'
+                                state: 'active'
                             }
                         ]
                     };
@@ -196,6 +199,10 @@ module.exports = function(cb) {
         /* Обновляем состояния персонажей - сон и бодрствование. Сейчас захардкожены следующие условия:
          *      пробуждение возможно с 6 утра до 20 вечера при сонливости < 4.0%
          *      засыпание возможно с 20 вечера до 6 утра при сонливости > 30%
+         *      если персонаж активен и не голоден (голод и жажда менее 4%) и усталость менее %  и сонливость менее % - начинаем работу
+         *      если персонаж работает и усталость более % - отправляем его отдыхать
+         *      если персонаж работает и сонливость более % - завершаем работу
+         *
          */
         agenda.define('changePersonState',
             function(job, done){
@@ -209,7 +216,7 @@ module.exports = function(cb) {
                     var stateActiveQuery = {
                         $and: [
                             {
-                                state: 'Сон'
+                                state: 'sleep'
                             },
                             {
                                 "item.somnolency.value": {
@@ -220,14 +227,14 @@ module.exports = function(cb) {
                     };
                     var stateActiveUpdate = {
                         $set: {
-                            "state": 'Активен'
+                            "state": 'active'
                         }
                     };
 
                     var stateSleepQuery = {
                         $and: [
                             {
-                                state: 'Активен'
+                                state: 'active'
                             },
                             {
                                 "item.somnolency.value": {
@@ -238,7 +245,7 @@ module.exports = function(cb) {
                     };
                     var stateSleepUpdate = {
                         $set: {
-                            "state": 'Сон'
+                            "state": 'sleep'
                         }
                     };
                     console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
@@ -283,7 +290,7 @@ module.exports = function(cb) {
                 var drinkQuery = {
                     $and: [
                         {
-                            state: 'Активен'
+                            state: 'active'
                         },
                         {
                             "item.thirst.value": {
@@ -301,7 +308,7 @@ module.exports = function(cb) {
                 var eatAndDrinkQuery = {
                     $and: [
                         {
-                            state: 'Активен'
+                            state: 'active'
                         },
                         {
                             "item.hunger.value": {

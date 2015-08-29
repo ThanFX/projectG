@@ -7,7 +7,11 @@ var schema = new Schema({
     personId: Schema.Types.ObjectId,
     maps: [{
         _id: false,
-        chunkId: Schema.Types.ObjectId
+        chunkId: Schema.Types.ObjectId,
+        jobs: [{
+            job: String,
+            rating: Number
+        }]
     }]
 });
 
@@ -32,6 +36,25 @@ schema.statics.isPersonKnowChunk = function(personId, chunkId, callback){
             callback(null, true);
         }
         callback(null, false);
+    });
+};
+
+schema.statics.getPersonJobChunk = function(personId, job, callback){
+    var PersonMap = this;
+    PersonMap.findOne({personId: personId, 'maps.jobs.job': job}, function(err, personMap){
+        if(err) {
+            log.error(err);
+            callback(err);
+        }
+        if(personMap){
+            var jobChunks = [];
+            for(var i = 0; i < personMap.maps.length; i++){
+                if(!(personMap.maps[i].job == job)) continue;
+                jobChunks.push(personMap.maps[i]);
+            }
+            callback(null, jobChunks);
+        }
+        callback(null, null);
     });
 };
 

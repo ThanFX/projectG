@@ -59,12 +59,18 @@ app.use(function(err, req, res, next) {
 
 // Start main world timer
 mainTimer();
+
 // Запускаем функции жизни персонажей
 var checkStates = require('./modules/personStates')(function(err){
     if(err){
         console.log(err);
     }
 });
-
+// Запускаем функции работы персонажей
+var checkWorks = require('./modules/personWorks')(function(err){
+    if(err){
+        console.log(err);
+    }
+});
 
 module.exports = app;
