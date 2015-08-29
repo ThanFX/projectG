@@ -9,3 +9,7 @@ logs
 node_modules/
 public/vendor/bower_components/
 
+
+bower_components
+resources
+phaser-2.4.3.zip
