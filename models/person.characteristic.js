@@ -80,6 +80,8 @@ schema.statics.getPCh = function(personId, callback){
         }
         var ch = {
             state: charcteristics.state,
+            action: charcteristics.action,
+            stage: charcteristics.stage,
             location: charcteristics.location,
             item: charcteristics.item
         };

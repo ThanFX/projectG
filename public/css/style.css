@@ -27,8 +27,8 @@ body {
     display: inline-block;
 }
 
-.state {
-    width: 66.7%;
+.state, .action, .stage {
+    width: 20%;
 }
 
 .health, .fatigue, .hunger, .thirst {
@@ -86,6 +86,19 @@ body {
 
 .person-icon:hover {
     background-image: url('../images/person-icon-hover.png');
+    width: 8px;
+    height: 8px;
+}
+
+.person-job-icon {
+    position: absolute;
+    background-image: url('../images/person-job-icon.png');
+    width: 8px;
+    height: 8px;
+}
+
+.person-job-icon:hover {
+    background-image: url('../images/person-job-icon-hover.png');
     width: 8px;
     height: 8px;
 }

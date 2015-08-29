@@ -234,7 +234,6 @@ function createFormattedChunkInfo(chunkId){
 function showChunkInfo(e){
     //Честные координаты карты, очищенные от всего (без учета прокрутки страницы!!!)
     var canvasRect = canvas.getClientRects();
-    //ToDo!!! Не работают!! Например, когда консоль внизу или полностью свободный экран!!! Пофиксить - критично!!!
     var mapX = e.pageX - canvasRect[0].left - startMapX;
     var mapY = e.pageY - canvasRect[0].top - startMapY;
     var virtualChunkX = Math.floor(mapX / 128);
@@ -252,6 +251,8 @@ function drawPersonInfo(person){
         '<div class="name"></div>' +
         '<div class="general">' +
         '<div class="state"></div>' +
+        '<div class="action"></div>' +
+        '<div class="stage"></div>' +
         '<div class="location"></div>' +
         '</div>' +
         '<div class="attributes">' +
@@ -267,6 +268,8 @@ function drawPersonInfo(person){
     var personDivCh = document.querySelector('.person-info-text');
     personDivCh.querySelector(".name").innerHTML = person[0].name;
     personDivCh.querySelector(".state").innerHTML = person[0].characterisitics.state;
+    personDivCh.querySelector(".action").innerHTML = person[0].characterisitics.action;
+    personDivCh.querySelector(".stage").innerHTML = person[0].characterisitics.stage;
     personDivCh.querySelector(".location").innerHTML = 'x: ' + person[0].characterisitics.location.x +
     ', y: ' + person[0].characterisitics.location.y;
     personDivCh.querySelector(".health").innerHTML = person[0].characterisitics.item.health.value + '%';
@@ -292,7 +295,11 @@ function drawAllPersons(){
     var chunkStartY = startMapY + (2 * chunkHeight);
     for(var i = 0; i < persons_client.length; i++) {
         var pIcon = document.createElement('div');
-        pIcon.className = 'person-icon';
+        if(persons_client[i].job == 'fishing'){
+            pIcon.className = 'person-job-icon';
+        } else {
+            pIcon.className = 'person-icon';
+        }
         pIcon.id = persons_client[i].id;
         var mapPersonIcon = mapHTML.appendChild(pIcon);
         mapPersonIcon.style.top = chunkStartY + rand(8, 120) + 'px';

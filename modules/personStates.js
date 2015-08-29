@@ -19,6 +19,9 @@ module.exports = function(cb) {
     agenda.cancel({name: 'getEatAndDrink'}, function(){
         console.log('Отменили старое задание getEatAndDrink');
     });
+    agenda.cancel({name: 'changePersonAction'}, function(){
+        console.log('Отменили старое задание changePersonActive');
+    });
 
     configSettings.getConfig(function (err, curConfig) {
         if (err) {
@@ -49,16 +52,21 @@ module.exports = function(cb) {
                             (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
         var checkHTSPeriod = Math.floor((+curConfig.params.checkPeriods.checkHTSEveryMinutes * 60) /
-        (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
         var checkEatDrinkPeriod = Math.floor((+curConfig.params.checkPeriods.checkEatDrinkEveryMinutes * 60) /
-        (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+
+        var checkActionPeriod = Math.floor((+curConfig.params.checkPeriods.checkActionsEveryMinutes * 60) /
+                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
 
         var agendaCheckStatePeriod = checkStatePeriod + ' seconds';
         var agendaCheckHTSPeriod = checkHTSPeriod + ' seconds';
         var agendaCheckEatDrinkPeriod = checkEatDrinkPeriod + ' seconds';
+        var agendaCheckActionPeriod = checkActionPeriod + ' seconds';
 
         console.log('Проверка состояний должна запускаться каждые ' + agendaCheckStatePeriod);
+        console.log('Проверка действий (активностей) должна запускаться каждые ' + agendaCheckActionPeriod);
         console.log('Проверка жизненных характеристик должна запускаться каждые ' + agendaCheckHTSPeriod);
         console.log('Проверка на кормление и поение должна запускаться каждые ' + agendaCheckEatDrinkPeriod);
 
@@ -69,6 +77,7 @@ module.exports = function(cb) {
          * При изменении показателей берем только тех персонажей, у которых с момента последнего изменения прошло от 1 до 2 часов.
          * Если больше 2 часов - трогаем ToDo! Написать отдельную проверку на них и прогонять при запуске сервера!
          * ToDo!!!! Вынести все параметры отсюда в отдельный конфиг в базу!!!
+         * ToDo! Добавить голод, жажду и сонливость для state=move - передвигается и для action=work - работает (голод/жажда +1,5 в час, сонливость - +2,5 в час)
          */
 
         agenda.define('changeHTS',
@@ -200,9 +209,7 @@ module.exports = function(cb) {
         /* Обновляем состояния персонажей - сон и бодрствование. Сейчас захардкожены следующие условия:
          *      пробуждение возможно с 6 утра до 20 вечера при сонливости < 4.0%
          *      засыпание возможно с 20 вечера до 6 утра при сонливости > 30%
-         *      если персонаж активен и не голоден (голод и жажда менее 4%) и усталость менее %  и сонливость менее % - начинаем работу
-         *      если персонаж работает и усталость более % - отправляем его отдыхать
-         *      если персонаж работает и сонливость более % - завершаем работу
+         *      состояние "передвижение" устанавливается отдельно
          *
          */
         agenda.define('changePersonState',
@@ -228,7 +235,8 @@ module.exports = function(cb) {
                     };
                     var stateActiveUpdate = {
                         $set: {
-                            "state": 'active'
+                            "state": 'active',
+                            "action": 'none'
                         }
                     };
 
@@ -236,6 +244,9 @@ module.exports = function(cb) {
                         $and: [
                             {
                                 state: 'active'
+                            },
+                            {
+                                action: 'none'
                             },
                             {
                                 "item.somnolency.value": {
@@ -246,7 +257,8 @@ module.exports = function(cb) {
                     };
                     var stateSleepUpdate = {
                         $set: {
-                            "state": 'sleep'
+                            "state": 'sleep',
+                            "action": 'none'
                         }
                     };
                     console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
@@ -279,6 +291,101 @@ module.exports = function(cb) {
                         }
                     );
                 });
+            }
+        );
+
+        /* Работаем с активностями персонажей - заставляем работать. Сейчас захардкожены следующие условия:
+         *      если персонаж активен, ничего не делает, не голоден (голод и жажда менее 4%) и усталость менее %  и сонливость менее 10% - начинаем работу
+         *      если персонаж работает и усталость более % - отправляем его отдыхать
+         *      если персонаж работает и сонливость более % - завершаем работу
+         *
+         */
+        agenda.define('changePersonAction',
+            function(job, done){
+                var workStartQuery = {
+                    $and: [
+                        // Тестовый рыболов!
+                        {
+                            "personId": '55913fe453470d6216a7f6ff'
+                        },
+                        {
+                            state: 'active'
+                        },
+                        {
+                            action: 'none'
+                        },
+                        {
+                            "item.hunger.value": {
+                                $lte: 4.0
+                            }
+                        },
+                        {
+                            "item.thirst.value": {
+                                $lte: 4.0
+                            }
+                        },
+                        {
+                            "item.somnolency.value": {
+                                $lte: 10
+                            }
+                        },
+                        {
+                            "item.fatigue.value": {
+                                $lte: 10
+                            }
+                        }
+                    ]
+                };
+                var workStartUpdate = {
+                    $set: {
+                        "action": 'work'
+                    }
+                };
+                var workEndQuery = {
+                    $and: [
+                        {
+                            state: 'active'
+                        },
+                        {
+                            action: 'work'
+                        },
+                        {
+                            "item.somnolency.value": {
+                                $gte: 24
+                            }
+                        },
+                        {
+                            "item.fatigue.value": {
+                                $gte: 80
+                            }
+                        }
+                    ]
+                };
+                var workEndUpdate = {
+                    $set: {
+                        "action": 'none'
+                    }
+                };
+                async.series([
+                        function(callback){
+                            console.log("Без труда нет жратвы!");
+                            updatePersons(workStartQuery, workStartUpdate, options, callback);
+                        },
+                        function(callback){
+                            console.log("От работы кони дохнут!");
+                            updatePersons(workEndQuery, workEndUpdate, options, callback);
+                        }
+                    ],
+                    function(err){
+                        if(err){
+                            console.log(err);
+                            log.error(err);
+                            cb(err);
+                        } else {
+                            done();
+                        }
+                    }
+                );
             }
         );
 
@@ -347,6 +454,7 @@ module.exports = function(cb) {
             }
         );
         agenda.every(agendaCheckStatePeriod, 'changePersonState');
+        agenda.every(agendaCheckActionPeriod, 'changePersonAction');
         agenda.every(agendaCheckHTSPeriod, 'changeHTS');
         agenda.every(agendaCheckEatDrinkPeriod, 'getEatAndDrink');
         agenda.start();
