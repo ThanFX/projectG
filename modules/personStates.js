@@ -10,19 +10,6 @@ var Agenda = require('agenda');
 module.exports = function(cb) {
     var agenda = new Agenda({db: { address: config.get('mongoose:uri')}});
 
-    agenda.cancel({name: 'changeHTS'}, function(){
-        console.log('Отменили старое задание changeHTS');
-    });
-    agenda.cancel({name: 'changePersonState'}, function(){
-        console.log('Отменили старое задание changePersonState');
-    });
-    agenda.cancel({name: 'getEatAndDrink'}, function(){
-        console.log('Отменили старое задание getEatAndDrink');
-    });
-    agenda.cancel({name: 'changePersonAction'}, function(){
-        console.log('Отменили старое задание changePersonActive');
-    });
-
     configSettings.getConfig(function (err, curConfig) {
         if (err) {
             log.error(err);
@@ -30,7 +17,215 @@ module.exports = function(cb) {
             cb(err);
         }
 
-        function updatePersons(query, doc, options, callback){
+        var updates = {
+            eatAndDrink: [
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                state: 'active'
+                            },
+                            {
+                                "item.hunger.value": {
+                                    $gte: 6.0
+                                }
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $set: {
+                            "item.thirst.value": 0.0,
+                            "item.hunger.value": 0.0
+                        }
+                    }
+                },
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                state: 'active'
+                            },
+                            {
+                                "item.thirst.value": {
+                                    $gte: 6.0
+                                }
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $set: {
+                            "item.thirst.value": 0.0
+                        }
+                    }
+                }
+            ],
+            state: [
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                state: 'sleep'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $lt: 4.0
+                                }
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $set: {
+                            "state": 'active',
+                            "action": 'none'
+                        }
+                    }
+                },
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                state: 'active'
+                            },
+                            {
+                                action: 'none'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $gt: 30.0
+                                }
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $set: {
+                            "state": 'sleep',
+                            "action": 'none'
+                        }
+                    }
+                }
+            ],
+            htfs: [
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $lte: ""
+                                }
+                            },
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $gt: ""
+                                }
+                            },
+                            {
+                                state: 'sleep'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $lt: 4.0
+                                }
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $inc: {
+                            "item.hunger.value": 0.5,
+                            "item.thirst.value": 2.0
+                        },
+                        $set: {
+                            "item.somnolency.value": 0.0,
+                            "item.lastChangeHTSTime": ""
+                        }
+                    }
+                },
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $lte: ""
+                                }
+                            },
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $gt: ""
+                                }
+                            },
+                            {
+                                state: 'sleep'
+                            },
+                            {
+                                "item.somnolency.value": {
+                                    $gte: 4.0
+                                }
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $inc: {
+                            "item.hunger.value": 0.5,
+                            "item.thirst.value": 2.0,
+                            "item.somnolency.value": -4.0
+                        },
+                        $set: {
+                            "item.lastChangeHTSTime": ""
+                        }
+                    }
+                },
+                {
+                    queryString: {
+                        $and: [
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $lte: ""
+                                }
+                            },
+                            {
+                                "item.lastChangeHTSTime": {
+                                    $gt: ""
+                                }
+                            },
+                            {
+                                state: 'active'
+                            }
+                        ]
+                    },
+                    updateString: {
+                        $inc: {
+                            "item.hunger.value": 1.0,
+                            "item.thirst.value": 2.0,
+                            "item.somnolency.value": 2.0
+                        },
+                        $set: {
+                            "item.lastChangeHTSTime": ""
+                        }
+                    }
+                }
+            ],
+            action: [
+                {
+                    queryString: {
+
+                    },
+                    updateString: {
+
+                    }
+                },
+                {
+                    queryString: {
+
+                    },
+                    updateString: {
+
+                    }
+                }
+            ]
+        };
+
+
+
+        function updatePersons(query, doc, options, msg, callback){
             Chars.update(query, doc, options, function(err, row){
                 if(err) {
                     return callback(err);
@@ -47,6 +242,19 @@ module.exports = function(cb) {
         var options = {
             multi: true
         };
+
+        agenda.cancel({name: 'changeHTS'}, function(){
+            console.log('Отменили старое задание changeHTS');
+        });
+        agenda.cancel({name: 'changePersonState'}, function(){
+            console.log('Отменили старое задание changePersonState');
+        });
+        agenda.cancel({name: 'getEatAndDrink'}, function(){
+            console.log('Отменили старое задание getEatAndDrink');
+        });
+        agenda.cancel({name: 'changePersonAction'}, function(){
+            console.log('Отменили старое задание changePersonActive');
+        });
 
         var checkStatePeriod = Math.floor((+curConfig.checkPeriods.checkStatesEveryMinutes * 60) /
                             (+curConfig.worldTimeSpeedKoef * +curConfig.calendar.worldCalendarKoef));
@@ -86,97 +294,17 @@ module.exports = function(cb) {
                         cb(err);
                     }
 
-                    // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
-                    var periodStart = +worldTime.milliseconds - (worldMinute * 120);
-                    var periodEnd = +worldTime.milliseconds - (worldMinute * 55);
 
-                    var HTSFirstSleepQuery = {
-                        $and: [
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $lte: periodEnd
-                                }
-                            },
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $gt: periodStart
-                                }
-                            },
-                            {
-                                state: 'sleep'
-                            },
-                            {
-                                "item.somnolency.value": {
-                                    $lt: 4.0
-                                }
-                            }
-                        ]
-                    };
-                    var HTSFirstSleepUpdate = {
-                        "item.lastChangeHTSTime": +worldTime.milliseconds,
-                        $inc: {
-                            "item.hunger.value": 0.5,
-                            "item.thirst.value": 2.0
-                        },
-                        $set: {
-                            "item.somnolency.value": 0.0
-                        }
-                    };
-                    var HTSSecondSleepQuery = {
-                        $and: [
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $lte: periodEnd
-                                }
-                            },
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $gt: periodStart
-                                }
-                            },
-                            {
-                                state: 'sleep'
-                            },
-                            {
-                                "item.somnolency.value": {
-                                    $gte: 4.0
-                                }
-                            }
-                        ]
-                    };
-                    var HTSSecondSleepUpdate = {
-                        "item.lastChangeHTSTime": +worldTime.milliseconds,
-                        $inc: {
-                            "item.hunger.value": 0.5,
-                            "item.thirst.value": 2.0,
-                            "item.somnolency.value": -4.0
-                        }
-                    };
-                    var HTSFirstActiveQuery = {
-                        $and: [
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $lte: periodEnd
-                                }
-                            },
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $gt: periodStart
-                                }
-                            },
-                            {
-                                state: 'active'
-                            }
-                        ]
-                    };
-                    var HTSFirstActiveUpdate = {
-                        "item.lastChangeHTSTime": +worldTime.milliseconds,
-                        $inc: {
-                            "item.hunger.value": 1.0,
-                            "item.thirst.value": 2.0,
-                            "item.somnolency.value": 2.0
-                        }
-                    };
+
+                    // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
+                    let periodStart = +worldTime.milliseconds - (worldMinute * 120);
+                    let periodEnd = +worldTime.milliseconds - (worldMinute * 55);
+
+                    for(let i = 0; i < updates.htfs.length; i++){
+                        updates.htfs[i].updateString.$set.item.lastChangeHTSTime = +worldTime.milliseconds;
+                        updates.htfs[i].queryString.$and.item.lastChangeHTSTime.$lte = periodEnd;
+                        updates.htfs[i].queryString.$and.item.lastChangeHTSTime.$gt = periodStart;
+                    }
 
                     async.series([
                         function(callback) {
@@ -218,46 +346,6 @@ module.exports = function(cb) {
                         cb(err);
                     }
 
-                    var stateActiveQuery = {
-                        $and: [
-                            {
-                                state: 'sleep'
-                            },
-                            {
-                                "item.somnolency.value": {
-                                    $lt: 4.0
-                                }
-                            }
-                        ]
-                    };
-                    var stateActiveUpdate = {
-                        $set: {
-                            "state": 'active',
-                            "action": 'none'
-                        }
-                    };
-
-                    var stateSleepQuery = {
-                        $and: [
-                            {
-                                state: 'active'
-                            },
-                            {
-                                action: 'none'
-                            },
-                            {
-                                "item.somnolency.value": {
-                                    $gt: 30.0
-                                }
-                            }
-                        ]
-                    };
-                    var stateSleepUpdate = {
-                        $set: {
-                            "state": 'sleep',
-                            "action": 'none'
-                        }
-                    };
                     console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
                     async.series([
                         function(callback){
@@ -392,42 +480,7 @@ module.exports = function(cb) {
          */
         agenda.define('getEatAndDrink',
             function(job, done){
-                var drinkQuery = {
-                    $and: [
-                        {
-                            state: 'active'
-                        },
-                        {
-                            "item.thirst.value": {
-                                $gte: 6.0
-                            }
-                        }
-                    ]
-                };
-                var drinkUpdate = {
-                    $set: {
-                        "item.thirst.value": 0.0
-                    }
-                };
 
-                var eatAndDrinkQuery = {
-                    $and: [
-                        {
-                            state: 'active'
-                        },
-                        {
-                            "item.hunger.value": {
-                                $gte: 6.0
-                            }
-                        }
-                    ]
-                };
-                var eatAndDrinkUpdate = {
-                    $set: {
-                        "item.thirst.value": 0.0,
-                        "item.hunger.value": 0.0
-                    }
-                };
                 async.series([
                         function(callback){
                             console.log("Кормим и поим!");
