@@ -113,7 +113,7 @@ timeSchema.statics.setTime = function(firstDelta, callback){
 
             var nowTime = Date.now();
             var deltaTime = (nowTime - curTime.lastServerTime) - firstDelta;
-            var deltaWorldTime = deltaTime * config.params.worldTimeSpeedKoef;
+            var deltaWorldTime = Math.floor(deltaTime * config.params.worldTimeSpeedKoef);
             curTime.lastWorldTime = +curTime.lastWorldTime + deltaWorldTime;
 
             curTime.lastServerTime = nowTime;
@@ -208,7 +208,7 @@ timeSchema.statics.getWorldTime = function(callback){
                 return elem2.timeInSeconds - elem1.timeInSeconds;
             });
             //Получаем нормальные дату и время исходя из конфигурации календаря
-            // Для месяца, декады и дня нет нулевых значений, они начинаются с единицы, но максимальное на 1 больше
+            // Для года, месяца, декады и дня нет нулевых значений, они начинаются с единицы, но максимальное на 1 больше
             periods.forEach(function(period, i, periods){
                 if(period.timeInSeconds > sec) {
                     worldTime[period.periodLabel] = 0 + +period.minValue;

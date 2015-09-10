@@ -6,12 +6,21 @@ var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
 var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
-var PersonMap = require('../models/personMap').personMap;
+var PersonMap = require('../models/person.maps').personMap;
 
 var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+Person.update({_id:"55edd3dbee622bd4024e180b"}, {$inc: {"skills.0.skillLevel": "$mul:{'skills.0.skillLevel':2}"}}, function(err, row){
+    if(err){
+        console.log(err);
+    } else {
+        console.log(row);
+    }
+});
+
+/*
 // Взяли рыбаков
 Person.getPersonCh({job: "Fishing"}, function(err, person){
     if(err){
@@ -50,6 +59,198 @@ function exploreChunk(personId){
 
     })
 }
+*/
+
+
+
+
+/*
+var jobs = {
+     "1": {
+         jobName: "Лесоруб",
+         skillName: "Лесорубство"
+     },
+     "2": {
+         jobName: "Углежог",
+         skillName: "Углежогство"
+     },
+     "3": {
+         jobName: "Рыболов",
+         skillName: "Рыболовство"
+     },
+     "4": {
+         jobName: "Охотник",
+         skillName: "Охота"
+     },
+     "5": {
+         jobName: "Фермер",
+         skillName: "Фермерство"
+     }
+};
+console.log("Начинаем генерацию персонажей");
+var time1 = Date.now();
+*/
+//Person.update({name: "Tester"}, {$inc: {"skills.0.skillLevel": 1.0}}, {multi: true}, function(err, result){
+//    if(err){
+//        console.log(err);
+//    } else {
+//        var time2 = Date.now();
+//        console.log("Закончили обновление. Затрачено " + (time2 - time1)/1000 + ' секунд');
+//        console.log(result);
+//    }
+//});
+/*
+var stream1 = Person.find({name:"Tester", job:"Лесоруб"}).stream();
+var stream2 = Person.find({name:"Tester", job:"Углежог"}).stream();
+var stream3 = Person.find({name:"Tester", job:"Рыболов"}).stream();
+var stream4 = Person.find({name:"Tester", job:"Охотник"}).stream();
+var stream5 = Person.find({name:"Tester", job:"Фермер"}).stream();
+
+async.parallel({
+        one: function(callback){
+            stream1.on('data', function(person){
+                person.skills[0].skillLevel = 4000.0;
+                person.save(function(){});
+            })
+            .on('error', function(err){
+                console.log(err);
+            })
+            .on('close', callback);
+        },
+        two: function(callback){
+            stream2.on('data', function(person){
+                person.skills[0].skillLevel = 4000.0;
+                person.save(function(){});
+            })
+                .on('error', function(err){
+                    console.log(err);
+                })
+                .on('close', callback);
+        },
+        three: function(callback){
+            stream3.on('data', function(person){
+                person.skills[0].skillLevel = 4000.0;
+                person.save(function(){});
+            })
+                .on('error', function(err){
+                    console.log(err);
+                })
+                .on('close', callback);
+        },
+        four: function(callback){
+            stream4.on('data', function(person){
+                person.skills[0].skillLevel = 4000.0;
+                person.save(function(){});
+            })
+                .on('error', function(err){
+                    console.log(err);
+                })
+                .on('close', callback);
+        },
+        five: function(callback){
+            stream5.on('data', function(person){
+                person.skills[0].skillLevel = 4000.0;
+                person.save(function(){});
+            })
+                .on('error', function(err){
+                    console.log(err);
+                })
+                .on('close', callback);
+        }
+    },
+    function(err) {
+        if(err){
+            console.log(err);
+        } else {
+            var time2 = Date.now();
+            console.log("Закончили обновление. Затрачено " + (time2 - time1)/1000 + ' секунд');
+        }
+    });
+*/
+
+//stream.on('data', function(person){
+//    var p = this;
+//    //p.pause();
+//    //console.log(person);
+//    person.skills[0].skillLevel = 3000.0;
+//    person.save(function(){
+//
+//        //p.resume(err)
+//    });
+//})
+//.on('error', function(err){
+//    console.log(err);
+//})
+//.on('close', function(){
+//        var time2 = Date.now();
+//        console.log("Закончили обновление. Затрачено " + (time2 - time1)/1000 + ' секунд');
+//});
+
+/*
+var count = 0;
+async.whilst(
+    function () { return count < 70000; },
+    function (callback) {
+        //var j = rand(1,5);
+        //var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
+        //var p = {
+        //    name: "Tester",
+        //    job: jobs[j].jobName,
+        //    skills: {
+        //        skillType: jobs[j].skillName,
+        //        skillLevel: s
+        //    }
+        //};
+        var stream = Model.find('*').stream();
+        stream.on('data', function(person){
+            person.skills[0].skillLevel *=2;
+            person.save(function(err){
+                if(err){
+                    console.log(err);
+                } else {
+                    callback();
+                }
+            });
+        });
+        //Person.findOneAndUpdate({name: "Tester"}, function(err){
+        //    if(err) {
+        //        console.log(err);
+        //    } else {
+        //        count++;
+        //        callback();
+        //    }
+        //});
+    },
+    function (err) {
+        if(err){
+            console.log(err);
+        } else {
+            var time2 = Date.now();
+            console.log("Закончили генерацию, всего - " + count + '. Затрачено ' + (time2 - time1)/1000 + ' секунд');
+        }
+    }
+);*/
+
+//var persons = [];
+//for(var i = 0; i < 10000; i++){
+//    var j = rand(1,5);
+//    var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
+//    var p = {
+//        name: "Tester",
+//        job: jobs[j].jobName,
+//        skills: {
+//           skillType: jobs[j].skillName,
+//           skillLevel: s
+//        }
+//    };
+//    persons.push(p);
+//    console.log(i);
+//    if((i % 1000) == 0){
+//        console.log(i/1000 + '%');
+//    }
+//}
+
+
 
 /*
 timeSettings.getWorldTime(function(err, wt){
@@ -199,51 +400,6 @@ Person.getPersonCh('*', function(err, persons){
 //         log.err(err);
 //     }
 //});
-
-//var jobs = {
-//     "1": {
-//         jobName: "Лесоруб",
-//         skillName: "Лесорубство"
-//     },
-//     "2": {
-//         jobName: "Углежог",
-//         skillName: "Углежогство"
-//     },
-//     "3": {
-//         jobName: "Рыболов",
-//         skillName: "Рыболовство"
-//     },
-//     "4": {
-//         jobName: "Охотник",
-//         skillName: "Охота"
-//     },
-//     "5": {
-//         jobName: "Фермер",
-//         skillName: "Фермерство"
-//     }
-//};
-//console.log("Начинаем генерацию персонажей");
-//var time1 = Date.now();
-//var persons = [];
-//for(var i = 0; i < 10000; i++){
-//    var j = rand(1,5);
-//    var s = rand(3,10); //любой крестьянин хоть чуть-чуть знает любую работу
-//    var p = {
-//        name: "Tester",
-//        job: jobs[j].jobName,
-//        skills: {
-//           skillType: jobs[j].skillName,
-//           skillLevel: s
-//        }
-//    };
-//    persons.push(p);
-//    console.log(i);
-//    if((i % 1000) == 0){
-//        console.log(i/1000 + '%');
-//    }
-//}
-//var time2 = Date.now();
-//console.log("Закончили генерацию, всего - " + persons.length + '. Затрачено ' + (time2 - time1)/1000 + ' секунд');
 //
 //
 ////log.info("Сохраняем характеристики");

@@ -96,4 +96,4 @@ schema.statics.addOrUpdateChunk = function(personId, chunk, callback){
     });
 };
 
-exports.personMap = mongoose.model('personMap', schema);
+exports.personMap = mongoose.model('person.maps', schema);

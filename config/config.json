@@ -1,7 +1,7 @@
 {
   "port": 3000,
   "mongoose": {
-    "uri-old": "mongodb://127.0.0.1:27018/game",
+    "uri-old": "mongodb://127.0.0.1:27016/game",
     "uri": "mongodb://127.0.0.1:27017/game",
     "options": {
       "server": {
