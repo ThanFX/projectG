@@ -48,17 +48,17 @@ module.exports = function(cb) {
             multi: true
         };
 
-        var checkStatePeriod = Math.floor((+curConfig.params.checkPeriods.checkStatesEveryMinutes * 60) /
-                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+        var checkStatePeriod = Math.floor((+curConfig.checkPeriods.checkStatesEveryMinutes * 60) /
+                            (+curConfig.worldTimeSpeedKoef * +curConfig.calendar.worldCalendarKoef));
 
-        var checkHTSPeriod = Math.floor((+curConfig.params.checkPeriods.checkHTSEveryMinutes * 60) /
-                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+        var checkHTSPeriod = Math.floor((+curConfig.checkPeriods.checkHTSEveryMinutes * 60) /
+                            (+curConfig.worldTimeSpeedKoef * +curConfig.calendar.worldCalendarKoef));
 
-        var checkEatDrinkPeriod = Math.floor((+curConfig.params.checkPeriods.checkEatDrinkEveryMinutes * 60) /
-                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+        var checkEatDrinkPeriod = Math.floor((+curConfig.checkPeriods.checkEatDrinkEveryMinutes * 60) /
+                            (+curConfig.worldTimeSpeedKoef * +curConfig.calendar.worldCalendarKoef));
 
-        var checkActionPeriod = Math.floor((+curConfig.params.checkPeriods.checkActionsEveryMinutes * 60) /
-                            (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+        var checkActionPeriod = Math.floor((+curConfig.checkPeriods.checkActionsEveryMinutes * 60) /
+                            (+curConfig.worldTimeSpeedKoef * +curConfig.calendar.worldCalendarKoef));
 
         var agendaCheckStatePeriod = checkStatePeriod + ' seconds';
         var agendaCheckHTSPeriod = checkHTSPeriod + ' seconds';

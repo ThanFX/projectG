@@ -22,6 +22,7 @@ module.exports = function(server){
         })
     }
 
+    io.emit('worldDate', worldTime);
 	(function emitWorldDate(){
 		timeSettings.getWorldTime(function(err, worldTime){
 		    if(err){

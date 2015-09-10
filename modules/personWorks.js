@@ -35,8 +35,8 @@ module.exports = function(cb){
         }
         // Грязный хак, 5000 миллисекунд мира в одной минуте
         var worldMinute = 5000;
-        var checkWorkPeriod = Math.floor((+curConfig.params.checkPeriods.checkWorkEveryMinutes * 60) /
-        (+curConfig.params.worldTimeSpeedKoef * +curConfig.params.calendar.worldCalendarKoef));
+        var checkWorkPeriod = Math.floor((+curConfig.checkPeriods.checkWorkEveryMinutes * 60) /
+        (+curConfig.worldTimeSpeedKoef * +curConfig.calendar.worldCalendarKoef));
         var agendaCheckWorkPeriod = checkWorkPeriod + ' seconds';
         console.log('Проверка работы должна запускаться каждые ' + agendaCheckWorkPeriod);
         agenda.define('checkWork',

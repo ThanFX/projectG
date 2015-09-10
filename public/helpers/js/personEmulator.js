@@ -1,4 +1,5 @@
-"use strict"
+"use strict";
+
 var startParams = {
     hunger: 0,
     thirst: 0,

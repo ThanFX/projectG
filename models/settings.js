@@ -11,7 +11,9 @@ var timeSchema = new Schema({
 
 var configSchema = new Schema({
     settingType: String,
-    params: Schema.Types.Mixed
+    checkPeriods: Schema.Types.Mixed,
+    calendar: Schema.Types.Mixed,
+    worldTimeSpeedKoef: String
 });
 
 var worldMapSchema = new Schema({
@@ -113,7 +115,7 @@ timeSchema.statics.setTime = function(firstDelta, callback){
 
             var nowTime = Date.now();
             var deltaTime = (nowTime - curTime.lastServerTime) - firstDelta;
-            var deltaWorldTime = Math.floor(deltaTime * config.params.worldTimeSpeedKoef);
+            var deltaWorldTime = Math.floor(deltaTime * config.worldTimeSpeedKoef);
             curTime.lastWorldTime = +curTime.lastWorldTime + deltaWorldTime;
 
             curTime.lastServerTime = nowTime;
@@ -139,7 +141,7 @@ timeSchema.statics.getTime = function(callback){
     });
 };
 
-configSchema.statics.setConfig = function(params, callback){
+configSchema.statics.setConfig = function(parameters, callback){
     var configSettings = this;
     configSettings.findOne({settingType:"config"}, function(err, curConfig){
         if(err) {
@@ -149,9 +151,11 @@ configSchema.statics.setConfig = function(params, callback){
         if(!curConfig) {
             curConfig = new configSettings({settingType:"config"});
         }
-        curConfig.params = params;
+        curConfig.calendar = parameters.calendar;
+        curConfig.checkPeriods = parameters.checkPeriods;
         console.log(curConfig);
-        curConfig.markModified('params');
+        curConfig.markModified('calendar');
+        curConfig.markModified('checkPeriods');
         curConfig.save(function(err){
             if(err) {
                 log.err(err);
@@ -199,10 +203,10 @@ timeSchema.statics.getWorldTime = function(callback){
                 callback(null);
             }
             // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента календаря.
-            var worldSeconds = (curTime.lastWorldTime * config.params.calendar.worldCalendarKoef) / 1000;
+            var worldSeconds = (curTime.lastWorldTime * config.calendar.worldCalendarKoef) / 1000;
             var sec = worldSeconds;
             var worldTime = {};
-            var periods = config.params.calendar.periods;
+            var periods = config.calendar.periods;
             //Сортируем массив периодов календаря по убыванию количества секунд в периоде
             periods.sort(function(elem1, elem2){
                 return elem2.timeInSeconds - elem1.timeInSeconds;
