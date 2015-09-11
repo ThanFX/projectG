@@ -47,7 +47,7 @@ module.exports = function(cb){
         );
 
         agenda.every(agendaCheckWorkPeriod, 'checkWork');
-        agenda.start();
+        //agenda.start();
     });
 
 

@@ -20,6 +20,8 @@ module.exports = function(cb) {
         var updates = {
             eatAndDrink: [
                 {
+                    // Голод более 6 - едим и пьем
+                    message: "Поели и попили: ",
                     queryString: {
                         $and: [
                             {
@@ -40,6 +42,8 @@ module.exports = function(cb) {
                     }
                 },
                 {
+                    // Жажда более 6 - пьем
+                    message: "Попили: ",
                     queryString: {
                         $and: [
                             {
@@ -61,6 +65,8 @@ module.exports = function(cb) {
             ],
             state: [
                 {
+                    // Спим и сонливость меньше 6 - просыпаемся
+                    message: "Проснулось: ",
                     queryString: {
                         $and: [
                             {
@@ -68,26 +74,24 @@ module.exports = function(cb) {
                             },
                             {
                                 "item.somnolency.value": {
-                                    $lt: 4.0
+                                    $lt: 6.0
                                 }
                             }
                         ]
                     },
                     updateString: {
                         $set: {
-                            "state": 'active',
-                            "action": 'none'
+                            "state": 'rest'
                         }
                     }
                 },
                 {
+                    // Не спим (отдыхаем) и сонливость больше 30 - ложимся спать
+                    message: "Заснуло: ",
                     queryString: {
                         $and: [
                             {
-                                state: 'active'
-                            },
-                            {
-                                action: 'none'
+                                state: 'rest'
                             },
                             {
                                 "item.somnolency.value": {
@@ -98,32 +102,23 @@ module.exports = function(cb) {
                     },
                     updateString: {
                         $set: {
-                            "state": 'sleep',
-                            "action": 'none'
+                            "state": 'sleep'
                         }
                     }
                 }
             ],
             htfs: [
                 {
+                    // Сон, сонливость меньше 6, обнуляем
+                    message: "Выспались, захотели пить и есть во сне: ",
                     queryString: {
                         $and: [
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $lte: ""
-                                }
-                            },
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $gt: ""
-                                }
-                            },
                             {
                                 state: 'sleep'
                             },
                             {
                                 "item.somnolency.value": {
-                                    $lt: 4.0
+                                    $lt: 6.0
                                 }
                             }
                         ]
@@ -140,24 +135,16 @@ module.exports = function(cb) {
                     }
                 },
                 {
+                    // Сон, сонливость больше 6, вычитаем 6
+                    message: "Захотели пить и есть во сне: ",
                     queryString: {
                         $and: [
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $lte: ""
-                                }
-                            },
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $gt: ""
-                                }
-                            },
                             {
                                 state: 'sleep'
                             },
                             {
                                 "item.somnolency.value": {
-                                    $gte: 4.0
+                                    $gte: 6.0
                                 }
                             }
                         ]
@@ -166,7 +153,7 @@ module.exports = function(cb) {
                         $inc: {
                             "item.hunger.value": 0.5,
                             "item.thirst.value": 2.0,
-                            "item.somnolency.value": -4.0
+                            "item.somnolency.value": -6.0
                         },
                         $set: {
                             "item.lastChangeHTSTime": ""
@@ -174,18 +161,10 @@ module.exports = function(cb) {
                     }
                 },
                 {
+                    // Бодрствуем
+                    message: "Захотели пить, есть и спать: ",
                     queryString: {
                         $and: [
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $lte: ""
-                                }
-                            },
-                            {
-                                "item.lastChangeHTSTime": {
-                                    $gt: ""
-                                }
-                            },
                             {
                                 state: 'active'
                             }
@@ -230,13 +209,13 @@ module.exports = function(cb) {
                 if(err) {
                     return callback(err);
                 } else {
-                    console.log(row);
-                    callback(null, row);
+                    console.log(msg + row.n);
+                    callback();
                 }
             });
         }
 
-        // Грязный хак, 5000 миллисекунд мира в одной минуте
+        // Грязный хак, 5000 миллисекунд реала в одной минуте мира (worldCalendarKoef == 12)
         var worldMinute = 5000;
 
         var options = {
@@ -294,29 +273,22 @@ module.exports = function(cb) {
                         cb(err);
                     }
 
-
-
                     // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
-                    let periodStart = +worldTime.milliseconds - (worldMinute * 120);
-                    let periodEnd = +worldTime.milliseconds - (worldMinute * 55);
+                    //var periodStart = +worldTime.milliseconds - (worldMinute * 120);
+                    //var periodEnd = +worldTime.milliseconds - (worldMinute * 55);
 
-                    for(let i = 0; i < updates.htfs.length; i++){
-                        updates.htfs[i].updateString.$set.item.lastChangeHTSTime = +worldTime.milliseconds;
-                        updates.htfs[i].queryString.$and.item.lastChangeHTSTime.$lte = periodEnd;
-                        updates.htfs[i].queryString.$and.item.lastChangeHTSTime.$gt = periodStart;
+                    // А нужно ли вообще это??? Гораздо проще просто инкрементить показатели по таймеру и всё. Погрешность возможна только на этапе запуска сервера.
+                    // Пока оставляю только таймстамп последнего обновления. Так, на всякий случай
+                    for(var i = 0; i < updates.htfs.length; i++){
+                        updates.htfs[i].updateString.$set['item.lastChangeHTSTime'] = +worldTime.milliseconds;
+                        //updates.htfs[i].queryString.$and.push({'item.lastChangeHTSTime': {$lte: periodEnd}});
+                        //updates.htfs[i].queryString.$and.push({'item.lastChangeHTSTime': {$gt: periodStart}});
                     }
 
-                    async.series([
-                        function(callback) {
-                            updatePersons(HTSFirstSleepQuery, HTSFirstSleepUpdate, options, callback);
+                    async.map(updates.htfs,
+                        function(htfs, callback){
+                            updatePersons(htfs.queryString, htfs.updateString, options, htfs.message, callback);
                         },
-                        function(callback) {
-                            updatePersons(HTSSecondSleepQuery, HTSSecondSleepUpdate, options, callback);
-                        },
-                        function(callback) {
-                            updatePersons(HTSFirstActiveQuery, HTSFirstActiveUpdate, options, callback);
-                        }
-                        ],
                         function(err){
                             if(err){
                                 console.log(err);
@@ -347,19 +319,18 @@ module.exports = function(cb) {
                     }
 
                     console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
+                    // Пока так, дальше будет видно
                     async.series([
                         function(callback){
                             if((+worldTime.hour >= 6) && (+worldTime.hour < 20)){
-                                console.log("Начинаем пробуждение!");
-                                updatePersons(stateActiveQuery, stateActiveUpdate, options, callback);
+                                updatePersons(updates.state[0].queryString, updates.state[0].updateString, options, updates.state[0].message, callback);
                             } else {
                                 callback();
                             }
                         },
                         function(callback){
                             if((+worldTime.hour >= 20) || (+worldTime.hour < 6)){
-                                console.log("Начинаем усыпление!");
-                                updatePersons(stateSleepQuery, stateSleepUpdate, options, callback);
+                                updatePersons(updates.state[1].queryString, updates.state[1].updateString, options, updates.state[1].message, callback);
                             } else {
                                 callback();
                             }
@@ -451,14 +422,15 @@ module.exports = function(cb) {
                         "action": 'none'
                     }
                 };
+                /*
                 async.series([
                         function(callback){
                             console.log("Без труда нет жратвы!");
-                            updatePersons(workStartQuery, workStartUpdate, options, callback);
+                            updatePersons(workStartQuery, workStartUpdate, options, "", callback);
                         },
                         function(callback){
                             console.log("От работы кони дохнут!");
-                            updatePersons(workEndQuery, workEndUpdate, options, callback);
+                            updatePersons(workEndQuery, workEndUpdate, options, "", callback);
                         }
                     ],
                     function(err){
@@ -471,6 +443,7 @@ module.exports = function(cb) {
                         }
                     }
                 );
+                */
             }
         );
 
@@ -480,17 +453,10 @@ module.exports = function(cb) {
          */
         agenda.define('getEatAndDrink',
             function(job, done){
-
-                async.series([
-                        function(callback){
-                            console.log("Кормим и поим!");
-                            updatePersons(eatAndDrinkQuery, eatAndDrinkUpdate, options, callback);
-                        },
-                        function(callback){
-                                console.log("Поим");
-                                updatePersons(drinkQuery, drinkUpdate, options, callback);
-                        }
-                    ],
+                async.map(updates.eatAndDrink,
+                    function(eatAndDrink, callback) {
+                        updatePersons(eatAndDrink.queryString, eatAndDrink.updateString, options, eatAndDrink.message, callback);
+                    },
                     function(err){
                         if(err){
                             console.log(err);
