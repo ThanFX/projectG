@@ -1,4 +1,6 @@
 var winston = require('winston');
+require('winston-logstash');
+
 var ENV = process.env.NODE_ENV;
 
 function getLogger(module) {
@@ -7,12 +9,15 @@ function getLogger(module) {
 
     return new winston.Logger({
         transports: [
-            new winston.transports.Console({
-                colorize: true,
+            new winston.transports.Logstash({
+                port: 28777,
+                node_name: 'G',
+                host: '127.0.0.1'
+                //colorize: true,
                 //level: ENV == 'development' ? 'debug' : 'error',
-                level: 'development',
-                label: path,
-                timestamp: true
+                //level: 'development',
+                //label: path,
+                //timestamp: true
             })
         ]
     });

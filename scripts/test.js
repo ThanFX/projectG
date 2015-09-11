@@ -12,13 +12,9 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
-Person.update({_id:"55edd3dbee622bd4024e180b"}, {$inc: {"skills.0.skillLevel": "$mul:{'skills.0.skillLevel':2}"}}, function(err, row){
-    if(err){
-        console.log(err);
-    } else {
-        console.log(row);
-    }
-});
+//log.info("Тестовое сообщение в logstash!");
+//log.warn("Тестовое предупредение в logstash!");
+//log.error("Тестовая ошибка в logstash!");
 
 /*
 // Взяли рыбаков
