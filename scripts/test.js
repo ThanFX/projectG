@@ -12,10 +12,6 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
-//log.info("Тестовое сообщение в logstash!");
-//log.warn("Тестовое предупредение в logstash!");
-//log.error("Тестовая ошибка в logstash!");
-
 /*
 // Взяли рыбаков
 Person.getPersonCh({job: "Fishing"}, function(err, person){
