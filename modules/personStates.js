@@ -257,6 +257,27 @@ module.exports = function(cb) {
         console.log('Проверка жизненных характеристик должна запускаться каждые ' + agendaCheckHTSPeriod);
         console.log('Проверка на кормление и поение должна запускаться каждые ' + agendaCheckEatDrinkPeriod);
 
+        //Создаем объект, содержащий скорости изменения HTFS для всех состояний в выбранный период обновления
+        var ch = {};
+        for(var state in curConfig.changeSpeed){
+            ch[state] = {};
+            ch[state].message = 'Состояние - ' + state;
+            ch[state].queryString = {};
+            ch[state].queryString.$and = [];
+            ch[state].queryString.$and.push({state: state});
+            ch[state].updateString = {};
+            ch[state].updateString.$set = {};
+            ch[state].updateString.$inc = {};
+            for(var characteristic in curConfig.changeSpeed[state]){
+                ch[state].updateString.$inc[characteristic] = curConfig.changeSpeed[state][characteristic] / (60 / checkHTSPeriod);
+                //ch[state][characteristic] = curConfig.changeSpeed[state][characteristic] / (60 / checkHTSPeriod);
+            }
+        }
+
+        console.log(ch);
+        //Генерим массив апдейтов HTFS для кадого состояния
+
+
         /* Обновляем жизненные характеристики персонажей - голод, жажду и сонливость. Сейчас захардкожены следующие коэффициенты (в час):
          *      голод: +0,5 во сне, +1 при бодрствовании
          *      жажда: +2 всегда
@@ -272,6 +293,9 @@ module.exports = function(cb) {
                         log.error(err);
                         cb(err);
                     }
+
+
+
 
                     // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
                     //var periodStart = +worldTime.milliseconds - (worldMinute * 120);

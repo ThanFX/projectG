@@ -12,6 +12,41 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random()*(max +1 - min));
 };
 
+configSettings.getConfig(function(err, curConfig){
+    if(err){
+        console.log(err);
+    } else {
+        var ch = []; var i = 0;
+        for(var state in curConfig.changeSpeed){
+            ch[i] = {};
+            ch[i].message = 'Состояние - ' + state;
+            ch[i].queryString = {};
+            ch[i].queryString.$and = [];
+            ch[i].queryString.$and.push({state: state});
+            ch[i].updateString = {};
+            ch[i].updateString.$set = {};
+            ch[i].updateString.$inc = {};
+            for(var characteristic in curConfig.changeSpeed[state]){
+                var chName = 'item.' + characteristic + '.value';
+                ch[i].updateString.$inc[chName] = curConfig.changeSpeed[state][characteristic] / (60 / 10);
+            }
+            console.log(ch[i].queryString);
+            console.log(ch[i].updateString);
+            i++;
+        }
+        for(var j = 0;j < ch.length; j++){
+            for(var c = 0 in ch[j].updateString.$inc){
+                if(ch[j].updateString.$inc[c] < 0){
+                    var newUpd = Object.assign({}, ch[j]);
+                    newUpd.message += ", обнулили " + ch[j].updateString.$inc[c].split(".")[1];
+                    newUpd.$set[ch[j].updateString.$inc[c]] = {$lte}
+                }
+            }
+        }
+        //console.log(ch);
+    }
+});
+
 /*
 // Взяли рыбаков
 Person.getPersonCh({job: "Fishing"}, function(err, person){

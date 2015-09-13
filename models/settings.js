@@ -13,6 +13,7 @@ var configSchema = new Schema({
     settingType: String,
     checkPeriods: Schema.Types.Mixed,
     calendar: Schema.Types.Mixed,
+    changeSpeed: Schema.Types.Mixed,
     worldTimeSpeedKoef: String
 });
 
