@@ -1,34 +1,38 @@
+'use strict';
+
 var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;
-//var Person = require('../models/person').Person;
+// var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
 var config = require('../config/index.js');
 var async = require('async');
 var Agenda = require('agenda');
 
-module.exports = function(cb) {
+module.exports = (cb) => {
     var agenda = new Agenda({db: { address: config.get('mongoose:uri')}});
 
-    configSettings.getConfig(function (err, curConfig) {
+    configSettings.getConfig((err, curConfig) => {
         if (err) {
             log.error(err);
             console.log(err);
             cb(err);
         }
-
+        let options = {
+            multi: true
+        };
         var updates = {
             eatAndDrink: [
                 {
                     // Голод более 6 - едим и пьем
-                    message: "Поели и попили: ",
+                    message: 'Поели и попили: ',
                     queryString: {
                         $and: [
                             {
                                 state: 'active'
                             },
                             {
-                                "item.hunger.value": {
+                                'item.hunger.value': {
                                     $gte: 6.0
                                 }
                             }
@@ -36,21 +40,21 @@ module.exports = function(cb) {
                     },
                     updateString: {
                         $set: {
-                            "item.thirst.value": 0.0,
-                            "item.hunger.value": 0.0
+                            'item.thirst.value': 0.0,
+                            'item.hunger.value': 0.0
                         }
                     }
                 },
                 {
                     // Жажда более 6 - пьем
-                    message: "Попили: ",
+                    message: 'Попили: ',
                     queryString: {
                         $and: [
                             {
                                 state: 'active'
                             },
                             {
-                                "item.thirst.value": {
+                                'item.thirst.value': {
                                     $gte: 6.0
                                 }
                             }
@@ -58,7 +62,7 @@ module.exports = function(cb) {
                     },
                     updateString: {
                         $set: {
-                            "item.thirst.value": 0.0
+                            'item.thirst.value': 0.0
                         }
                     }
                 }
@@ -66,14 +70,14 @@ module.exports = function(cb) {
             state: [
                 {
                     // Спим и сонливость меньше 6 - просыпаемся
-                    message: "Проснулось: ",
+                    message: 'Проснулось: ',
                     queryString: {
                         $and: [
                             {
                                 state: 'sleep'
                             },
                             {
-                                "item.somnolency.value": {
+                                'item.somnolency.value': {
                                     $lt: 6.0
                                 }
                             }
@@ -81,20 +85,20 @@ module.exports = function(cb) {
                     },
                     updateString: {
                         $set: {
-                            "state": 'rest'
+                            state: 'rest'
                         }
                     }
                 },
                 {
                     // Не спим (отдыхаем) и сонливость больше 30 - ложимся спать
-                    message: "Заснуло: ",
+                    message: 'Заснуло: ',
                     queryString: {
                         $and: [
                             {
                                 state: 'rest'
                             },
                             {
-                                "item.somnolency.value": {
+                                'item.somnolency.value': {
                                     $gt: 30.0
                                 }
                             }
@@ -102,82 +106,7 @@ module.exports = function(cb) {
                     },
                     updateString: {
                         $set: {
-                            "state": 'sleep'
-                        }
-                    }
-                }
-            ],
-            htfs: [
-                {
-                    // Сон, сонливость меньше 6, обнуляем
-                    message: "Выспались, захотели пить и есть во сне: ",
-                    queryString: {
-                        $and: [
-                            {
-                                state: 'sleep'
-                            },
-                            {
-                                "item.somnolency.value": {
-                                    $lt: 6.0
-                                }
-                            }
-                        ]
-                    },
-                    updateString: {
-                        $inc: {
-                            "item.hunger.value": 0.5,
-                            "item.thirst.value": 2.0
-                        },
-                        $set: {
-                            "item.somnolency.value": 0.0,
-                            "item.lastChangeHTSTime": ""
-                        }
-                    }
-                },
-                {
-                    // Сон, сонливость больше 6, вычитаем 6
-                    message: "Захотели пить и есть во сне: ",
-                    queryString: {
-                        $and: [
-                            {
-                                state: 'sleep'
-                            },
-                            {
-                                "item.somnolency.value": {
-                                    $gte: 6.0
-                                }
-                            }
-                        ]
-                    },
-                    updateString: {
-                        $inc: {
-                            "item.hunger.value": 0.5,
-                            "item.thirst.value": 2.0,
-                            "item.somnolency.value": -6.0
-                        },
-                        $set: {
-                            "item.lastChangeHTSTime": ""
-                        }
-                    }
-                },
-                {
-                    // Бодрствуем
-                    message: "Захотели пить, есть и спать: ",
-                    queryString: {
-                        $and: [
-                            {
-                                state: 'active'
-                            }
-                        ]
-                    },
-                    updateString: {
-                        $inc: {
-                            "item.hunger.value": 1.0,
-                            "item.thirst.value": 2.0,
-                            "item.somnolency.value": 2.0
-                        },
-                        $set: {
-                            "item.lastChangeHTSTime": ""
+                            state: 'sleep'
                         }
                     }
                 }
@@ -201,37 +130,45 @@ module.exports = function(cb) {
                 }
             ]
         };
-
-
-
-        function updatePersons(query, doc, options, msg, callback){
-            Chars.update(query, doc, options, function(err, row){
-                if(err) {
+        function updatePersons (query, doc, options, msg, callback) {
+            Chars.update(query, doc, options, (err, row) => {
+                if (err) {
                     return callback(err);
-                } else {
-                    console.log(msg + row.n);
-                    callback();
                 }
+                console.log(msg + row.n);
+                callback();
             });
         }
-
+        function createHTFSAsync (result, done) {
+            async.map(result,
+                (resultString, callback) => {
+                    updatePersons(resultString.queryString, resultString.updateString,
+                        options, resultString.message, callback);
+                },
+                (err) => {
+                    if (err) {
+                        console.log(err);
+                        log.error(err);
+                        cb(err);
+                    } else {
+                        done();
+                    }
+                }
+            );
+        }
         // Грязный хак, 5000 миллисекунд реала в одной минуте мира (worldCalendarKoef == 12)
-        var worldMinute = 5000;
+        // var worldMinute = 5000;
 
-        var options = {
-            multi: true
-        };
-
-        agenda.cancel({name: 'changeHTS'}, function(){
+        agenda.cancel({name: 'changeHTS'}, () => {
             console.log('Отменили старое задание changeHTS');
         });
-        agenda.cancel({name: 'changePersonState'}, function(){
+        agenda.cancel({name: 'changePersonState'}, () => {
             console.log('Отменили старое задание changePersonState');
         });
-        agenda.cancel({name: 'getEatAndDrink'}, function(){
+        agenda.cancel({name: 'getEatAndDrink'}, () => {
             console.log('Отменили старое задание getEatAndDrink');
         });
-        agenda.cancel({name: 'changePersonAction'}, function(){
+        agenda.cancel({name: 'changePersonAction'}, () => {
             console.log('Отменили старое задание changePersonActive');
         });
 
@@ -257,27 +194,6 @@ module.exports = function(cb) {
         console.log('Проверка жизненных характеристик должна запускаться каждые ' + agendaCheckHTSPeriod);
         console.log('Проверка на кормление и поение должна запускаться каждые ' + agendaCheckEatDrinkPeriod);
 
-        //Создаем объект, содержащий скорости изменения HTFS для всех состояний в выбранный период обновления
-        var ch = {};
-        for(var state in curConfig.changeSpeed){
-            ch[state] = {};
-            ch[state].message = 'Состояние - ' + state;
-            ch[state].queryString = {};
-            ch[state].queryString.$and = [];
-            ch[state].queryString.$and.push({state: state});
-            ch[state].updateString = {};
-            ch[state].updateString.$set = {};
-            ch[state].updateString.$inc = {};
-            for(var characteristic in curConfig.changeSpeed[state]){
-                ch[state].updateString.$inc[characteristic] = curConfig.changeSpeed[state][characteristic] / (60 / checkHTSPeriod);
-                //ch[state][characteristic] = curConfig.changeSpeed[state][characteristic] / (60 / checkHTSPeriod);
-            }
-        }
-
-        console.log(ch);
-        //Генерим массив апдейтов HTFS для кадого состояния
-
-
         /* Обновляем жизненные характеристики персонажей - голод, жажду и сонливость. Сейчас захардкожены следующие коэффициенты (в час):
          *      голод: +0,5 во сне, +1 при бодрствовании
          *      жажда: +2 всегда
@@ -286,43 +202,36 @@ module.exports = function(cb) {
          */
 
         agenda.define('changeHTS',
-            function(job, done){
-                timeSettings.getWorldTime(function(err, worldTime){
-                    if(err){
+            (job, done) => {
+                timeSettings.getWorldTime((err, worldTime) => {
+                    if (err) {
                         console.log(err);
                         log.error(err);
                         cb(err);
                     }
-
-
+                    require('../config/htfs').then(
+                        result => {
+                            for (let i = 0; i < result.length; i++) {
+                                result[i].updateString.$set['item.lastChangeHTSTime'] = +worldTime.milliseconds;
+                                // updates.htfs[i].queryString.$and.push({'item.lastChangeHTSTime': {$lte: periodEnd}});
+                                // updates.htfs[i].queryString.$and.push({'item.lastChangeHTSTime': {$gt: periodStart}});
+                            }
+                            createHTFSAsync(result, done);
+                        },
+                        error => {
+                            console.log(error);
+                            log.error(error);
+                            cb(error);
+                        }
+                    );
 
 
                     // Берем персонажей, у которых последнее обновление характеристик было не менее часа и не более 2 часов назад
-                    //var periodStart = +worldTime.milliseconds - (worldMinute * 120);
-                    //var periodEnd = +worldTime.milliseconds - (worldMinute * 55);
+                    // var periodStart = +worldTime.milliseconds - (worldMinute * 120);
+                    // var periodEnd = +worldTime.milliseconds - (worldMinute * 55);
 
                     // А нужно ли вообще это??? Гораздо проще просто инкрементить показатели по таймеру и всё. Погрешность возможна только на этапе запуска сервера.
                     // Пока оставляю только таймстамп последнего обновления. Так, на всякий случай
-                    for(var i = 0; i < updates.htfs.length; i++){
-                        updates.htfs[i].updateString.$set['item.lastChangeHTSTime'] = +worldTime.milliseconds;
-                        //updates.htfs[i].queryString.$and.push({'item.lastChangeHTSTime': {$lte: periodEnd}});
-                        //updates.htfs[i].queryString.$and.push({'item.lastChangeHTSTime': {$gt: periodStart}});
-                    }
-
-                    async.map(updates.htfs,
-                        function(htfs, callback){
-                            updatePersons(htfs.queryString, htfs.updateString, options, htfs.message, callback);
-                        },
-                        function(err){
-                            if(err){
-                                console.log(err);
-                                log.error(err);
-                                cb(err);
-                            } else {
-                                done();
-                            }
-                        }
-                    );
                 });
             }
         );
@@ -330,7 +239,7 @@ module.exports = function(cb) {
         /* Обновляем состояния персонажей - сон и бодрствование. Сейчас захардкожены следующие условия:
          *      пробуждение возможно с 6 утра до 20 вечера при сонливости < 4.0%
          *      засыпание возможно с 20 вечера до 6 утра при сонливости > 30%
-         *      состояние "передвижение" устанавливается отдельно
+         *      состояние 'передвижение' устанавливается отдельно
          *
          */
         agenda.define('changePersonState',
@@ -342,7 +251,7 @@ module.exports = function(cb) {
                         cb(err);
                     }
 
-                    console.log("Сейчас " + worldTime.hour + ':' + worldTime.minute);
+                    console.log('Сейчас ' + worldTime.hour + ':' + worldTime.minute);
                     // Пока так, дальше будет видно
                     async.series([
                         function(callback){
@@ -386,7 +295,7 @@ module.exports = function(cb) {
                     $and: [
                         // Тестовый рыболов!
                         {
-                            "personId": '55913fe453470d6216a7f6ff'
+                            'personId': '55913fe453470d6216a7f6ff'
                         },
                         {
                             state: 'active'
@@ -395,22 +304,22 @@ module.exports = function(cb) {
                             action: 'none'
                         },
                         {
-                            "item.hunger.value": {
+                            'item.hunger.value': {
                                 $lte: 6.0
                             }
                         },
                         {
-                            "item.thirst.value": {
+                            'item.thirst.value': {
                                 $lte: 6.0
                             }
                         },
                         {
-                            "item.somnolency.value": {
+                            'item.somnolency.value': {
                                 $lte: 10
                             }
                         },
                         {
-                            "item.fatigue.value": {
+                            'item.fatigue.value': {
                                 $lte: 10
                             }
                         }
@@ -418,7 +327,7 @@ module.exports = function(cb) {
                 };
                 var workStartUpdate = {
                     $set: {
-                        "action": 'work'
+                        'action': 'work'
                     }
                 };
                 var workEndQuery = {
@@ -430,12 +339,12 @@ module.exports = function(cb) {
                             action: 'work'
                         },
                         {
-                            "item.somnolency.value": {
+                            'item.somnolency.value': {
                                 $gte: 24
                             }
                         },
                         {
-                            "item.fatigue.value": {
+                            'item.fatigue.value': {
                                 $gte: 80
                             }
                         }
@@ -443,18 +352,18 @@ module.exports = function(cb) {
                 };
                 var workEndUpdate = {
                     $set: {
-                        "action": 'none'
+                        'action': 'none'
                     }
                 };
                 /*
                 async.series([
                         function(callback){
-                            console.log("Без труда нет жратвы!");
-                            updatePersons(workStartQuery, workStartUpdate, options, "", callback);
+                            console.log('Без труда нет жратвы!');
+                            updatePersons(workStartQuery, workStartUpdate, options, '', callback);
                         },
                         function(callback){
-                            console.log("От работы кони дохнут!");
-                            updatePersons(workEndQuery, workEndUpdate, options, "", callback);
+                            console.log('От работы кони дохнут!');
+                            updatePersons(workEndQuery, workEndUpdate, options, '', callback);
                         }
                     ],
                     function(err){
