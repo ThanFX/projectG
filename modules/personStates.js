@@ -1,5 +1,4 @@
 'use strict';
-
 var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
 var configSettings = require('../models/settings').configSettings;

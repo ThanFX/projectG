@@ -1,3 +1,4 @@
+'use strict';
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
 //var async = require('async');
@@ -71,22 +72,30 @@ schema.statics.upsertPCh = function(personId, lastCheckTime, state, characterist
     });
 };
 
-schema.statics.getPCh = function(personId, callback){
+schema.statics.getPCh = function (personId, callback) {
     var ch = this;
-    ch.findOne({personId: personId}, function(err, charcteristics){
-        if(err){
+    ch.findOne({personId: personId}, (err, charcteristics) => {
+        if (err) {
             log.error(err);
             callback(err);
         }
-        var ch = {
+        let chs = {
             state: charcteristics.state,
             action: charcteristics.action,
             stage: charcteristics.stage,
             location: charcteristics.location,
             item: charcteristics.item
         };
-        callback(null, ch);
+        for (let c in chs.item) {
+            if (!chs.item.hasOwnProperty(c)) {
+                continue;
+            }
+            if (c == 'lastChangeLifeTime' || c == 'lastChangeHTSTime') {
+                continue;
+            }
+            chs.item[c].value = Math.round(chs.item[c].value * 100) / 100;
+        }
+        callback(null, chs);
     });
 };
-
 exports.PersonCh = mongoose.model('Person.Characteristic', schema);

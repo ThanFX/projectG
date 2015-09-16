@@ -8,30 +8,14 @@ module.exports = new Promise((resolve, reject) => {
         }
         let period = config.checkPeriods.checkHTSEveryMinutes;
         let s = config.changeSpeed;
+
         let htfs = [
-            {
-                message: 'Состояние - сон, увеличиваем голод и жажду, уменьшаем сонливость и усталость: ',
-                queryString: { $and: [
-                    { state: 'sleep' },
-                    {'item.somnolency.value': { $gt: (s.sleep.somnolency / period) } },
-                    {'item.fatigue.value': { $gt: (s.sleep.fatigue / period) } }
-                ]},
-                updateString: {
-                    $inc: {
-                        'item.hunger.value': (s.sleep.hunger / period),
-                        'item.thirst.value': (s.sleep.thirst / period),
-                        'item.fatigue.value': (s.sleep.fatigue / period),
-                        'item.somnolency.value': (s.sleep.somnolency / period)
-                    },
-                    $set: { 'item.lastChangeHTSTime': '' }
-                }
-            },
             {
                 message: 'Состояние - сон, увеличиваем голод и жажду, обнуляем сонливость и усталость: ',
                 queryString: { $and: [
                     { state: 'sleep' },
-                    {'item.somnolency.value': { $lte: (s.sleep.somnolency / period) } },
-                    {'item.fatigue.value': { $lte: (s.sleep.fatigue / period) } }
+                    {'item.somnolency.value': { $lte: (-1 * (s.sleep.somnolency / period)) } },
+                    {'item.fatigue.value': { $lte: (-1 * (s.sleep.fatigue / period)) } }
                 ]},
                 updateString: {
                     $inc: {
@@ -49,8 +33,8 @@ module.exports = new Promise((resolve, reject) => {
                 message: 'Состояние - сон, увеличиваем голод и жажду, уменьшаем сонливость, обнуляем усталость: ',
                 queryString: { $and: [
                     { state: 'sleep' },
-                    {'item.somnolency.value': { $gt: (s.sleep.somnolency / period) } },
-                    {'item.fatigue.value': { $lte: (s.sleep.fatigue / period) } }
+                    {'item.somnolency.value': { $gt: (-1 * (s.sleep.somnolency / period)) } },
+                    {'item.fatigue.value': { $lte: (-1 * (s.sleep.fatigue / period)) } }
                 ]},
                 updateString: {
                     $inc: {
@@ -68,8 +52,8 @@ module.exports = new Promise((resolve, reject) => {
                 message: 'Состояние - сон, увеличиваем голод и жажду, уменьшаем усталость, обнуляем сонливость: ',
                 queryString: { $and: [
                     { state: 'sleep' },
-                    {'item.somnolency.value': { $lte: (s.sleep.somnolency / period) } },
-                    {'item.fatigue.value': { $gt: (s.sleep.fatigue / period) } }
+                    {'item.somnolency.value': { $lte: (-1 * (s.sleep.somnolency / period)) } },
+                    {'item.fatigue.value': { $gt: (-1 * (s.sleep.fatigue / period)) } }
                 ]},
                 updateString: {
                     $inc: {
@@ -84,17 +68,18 @@ module.exports = new Promise((resolve, reject) => {
                 }
             },
             {
-                message: 'Состояние - отдых, увеличиваем голод, жажду и сонливость, уменьшаем усталость: ',
+                message: 'Состояние - сон, увеличиваем голод и жажду, уменьшаем сонливость и усталость: ',
                 queryString: { $and: [
-                    { state: 'rest' },
-                    {'item.fatigue.value': { $gt: (s.rest.fatigue / period) } }
+                    { state: 'sleep' },
+                    {'item.somnolency.value': { $gt: (-1 * (s.sleep.somnolency / period)) } },
+                    {'item.fatigue.value': { $gt: (-1 * (s.sleep.fatigue / period)) } }
                 ]},
                 updateString: {
                     $inc: {
-                        'item.hunger.value': (s.rest.hunger / period),
-                        'item.thirst.value': (s.rest.thirst / period),
-                        'item.fatigue.value': (s.rest.fatigue / period),
-                        'item.somnolency.value': (s.rest.somnolency / period)
+                        'item.hunger.value': (s.sleep.hunger / period),
+                        'item.thirst.value': (s.sleep.thirst / period),
+                        'item.fatigue.value': (s.sleep.fatigue / period),
+                        'item.somnolency.value': (s.sleep.somnolency / period)
                     },
                     $set: { 'item.lastChangeHTSTime': '' }
                 }
@@ -103,7 +88,7 @@ module.exports = new Promise((resolve, reject) => {
                 message: 'Состояние - отдых, увеличиваем голод, жажду и сонливость, обнуляем усталость: ',
                 queryString: { $and: [
                     { state: 'rest' },
-                    {'item.fatigue.value': { $lte: (s.rest.fatigue / period) } }
+                    {'item.fatigue.value': { $lte: (-1 * (s.rest.fatigue / period)) } }
                 ]},
                 updateString: {
                     $inc: {
@@ -115,6 +100,22 @@ module.exports = new Promise((resolve, reject) => {
                         'item.lastChangeHTSTime': '',
                         'item.fatigue.value': 0.0
                     }
+                }
+            },
+            {
+                message: 'Состояние - отдых, увеличиваем голод, жажду и сонливость, уменьшаем усталость: ',
+                queryString: { $and: [
+                    { state: 'rest' },
+                    {'item.fatigue.value': { $gt: (-1 * (s.rest.fatigue / period)) } }
+                ]},
+                updateString: {
+                    $inc: {
+                        'item.hunger.value': (s.rest.hunger / period),
+                        'item.thirst.value': (s.rest.thirst / period),
+                        'item.fatigue.value': (s.rest.fatigue / period),
+                        'item.somnolency.value': (s.rest.somnolency / period)
+                    },
+                    $set: { 'item.lastChangeHTSTime': '' }
                 }
             },
             {
@@ -157,6 +158,7 @@ module.exports = new Promise((resolve, reject) => {
                 }
             }
         ];
+        console.log(s.rest.fatigue / period);
         resolve(htfs);
     });
 });
