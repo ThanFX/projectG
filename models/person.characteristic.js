@@ -1,8 +1,8 @@
 'use strict';
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
-//var async = require('async');
-var Person = require('../models/person').Person;
+// var async = require('async');
+// var Person = require('../models/person').Person;
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
@@ -27,54 +27,53 @@ var schema = new Schema({
     }
 });
 
-schema.statics.upsertPCh = function(personId, lastCheckTime, state, characteristics, location, callback){
+schema.statics.upsertPCh = function (personId, lastCheckTime, state, characteristics, location, callback) {
     var Ch = this;
     var Person = require('../models/person').Person;
-    Person.isPerson({_id: personId}, function(err, person){
-        if(err){
+    Person.isPerson({_id: personId}, function (err, person) {
+        if (err) {
             callback(err);
         }
-        if(person){
-            Ch.findOne({personId: personId}, function(err, values){
-                if(err){
+        if (person ) {
+            Ch.findOne({personId: personId}, function (err, values) {
+                if (err) {
                     callback(err);
                 }
-                if(!values){
+                if (!values) {
                     values = new Ch({personId: personId});
                 }
-                if(state){
+                if (state) {
                     values.state = state;
                 }
-                if(lastCheckTime){
+                if (lastCheckTime) {
                     values.lastCheckTime = lastCheckTime;
                 }
 
-                if(characteristics){
+                if (characteristics) {
                     values.item = characteristics;
                     values.markModified('items');
                 }
-                if(location){
+                if (location) {
                     values.location = location;
                     values.markModified('location');
                 }
                 console.log(values);
-                values.save(function(err, pch){
-                    if(err){
+                values.save(function (err, pch) {
+                    if (err) {
                         callback(err);
-                    }   
+                    }
                     callback(null, pch);
                 });
             });
         } else {
-            log.warn("Пользователь " + personId + " не существует");
-            callback("User not found", null);
+            log.warn(`Пользователь ${personId} не существует`);
+            callback(`User not found`, null);
         }
     });
 };
 
 schema.statics.getPCh = function (personId, callback) {
-    var ch = this;
-    ch.findOne({personId: personId}, (err, charcteristics) => {
+    this.findOne({personId: personId}, (err, charcteristics) => {
         if (err) {
             log.error(err);
             callback(err);

@@ -1,6 +1,6 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
+// var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -61,14 +61,14 @@ app.use(function(err, req, res, next) {
 mainTimer();
 
 // Запускаем функции жизни персонажей
-var checkStates = require('./modules/personStates')(function(err){
-    if(err){
+var checkStates = require('./modules/personStates')(function (err) {
+    if (err) {
         console.log(err);
     }
 });
 // Запускаем функции работы персонажей
-var checkWorks = require('./modules/personWorks')(function(err){
-    if(err){
+var checkWorks = require('./modules/personWorks')(function (err) {
+    if (err) {
         console.log(err);
     }
 });

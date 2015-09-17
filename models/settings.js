@@ -1,6 +1,7 @@
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
 var Chunks = require('../models/chunk').Chunks;
+var hub = require('../config/hub');
 var Schema = mongoose.Schema;
 
 var timeSchema = new Schema({
@@ -118,7 +119,7 @@ timeSchema.statics.setTime = function(firstDelta, callback){
             var deltaTime = (nowTime - curTime.lastServerTime) - firstDelta;
             var deltaWorldTime = Math.floor(deltaTime * config.worldTimeSpeedKoef);
             curTime.lastWorldTime = +curTime.lastWorldTime + deltaWorldTime;
-
+            hub.time = convertTimeToDate(curTime.lastWorldTime, config.calendar);
             curTime.lastServerTime = nowTime;
             curTime.save(function (err) {
                 if (err) {
@@ -203,31 +204,36 @@ timeSchema.statics.getWorldTime = function(callback){
                 log.err("Ошибка загрузки времени");
                 callback(null);
             }
-            // Пересчитываем количество "реальных" милисекунд жизни мира в виртуальные секунды относительно коэффициента календаря.
-            var worldSeconds = (curTime.lastWorldTime * config.calendar.worldCalendarKoef) / 1000;
-            var sec = worldSeconds;
-            var worldTime = {};
-            var periods = config.calendar.periods;
-            //Сортируем массив периодов календаря по убыванию количества секунд в периоде
-            periods.sort(function(elem1, elem2){
-                return elem2.timeInSeconds - elem1.timeInSeconds;
-            });
-            //Получаем нормальные дату и время исходя из конфигурации календаря
-            // Для года, месяца, декады и дня нет нулевых значений, они начинаются с единицы, но максимальное на 1 больше
-            periods.forEach(function(period, i, periods){
-                if(period.timeInSeconds > sec) {
-                    worldTime[period.periodLabel] = 0 + +period.minValue;
-                } else {
-                    worldTime[period.periodLabel] = Math.floor(sec / period.timeInSeconds);
-                    sec = sec - (worldTime[period.periodLabel] * period.timeInSeconds);
-                    worldTime[period.periodLabel] += +period.minValue;
-                }
-            });
-            worldTime.milliseconds = curTime.lastWorldTime;
-            callback(null, worldTime);
+            callback(null, convertTimeToDate(curTime.lastWorldTime, config.calendar));
         });
     });
 };
+
+function convertTimeToDate (time, calendar) {
+    // Пересчитываем количество "реальных" милисекунд жизни мира
+    // в виртуальные секунды относительно коэффициента календаря.
+    var worldSeconds = (time * calendar.worldCalendarKoef) / 1000;
+    // let sec = worldSeconds;
+    var worldTime = {};
+    var periods = calendar.periods;
+    // Сортируем массив периодов календаря по убыванию количества секунд в периоде
+    periods.sort((elem1, elem2) => {
+        return elem2.timeInSeconds - elem1.timeInSeconds;
+    });
+    // Получаем нормальные дату и время исходя из конфигурации календаря
+    // Для года, месяца, декады и дня нет нулевых значений, они начинаются с единицы, но максимальное на 1 больше
+    periods.forEach((period, i, periods) => {
+        if (period.timeInSeconds > worldSeconds) {
+            worldTime[period.periodLabel] = 0 + +period.minValue;
+        } else {
+            worldTime[period.periodLabel] = Math.floor(worldSeconds / period.timeInSeconds);
+            worldSeconds -= (worldTime[period.periodLabel] * period.timeInSeconds);
+            worldTime[period.periodLabel] += +period.minValue;
+        }
+    });
+    worldTime.milliseconds = time;
+    return worldTime;
+}
 
 exports.timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
 exports.configSettings = mongoose.model('configSettings', configSchema, 'settings');

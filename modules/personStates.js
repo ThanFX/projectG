@@ -7,6 +7,7 @@ var Chars = require('../models/person.characteristic').PersonCh;
 var config = require('../config/index.js');
 var async = require('async');
 var Agenda = require('agenda');
+var hub = require('../config/hub');
 
 module.exports = (cb) => {
     var agenda = new Agenda({db: { address: config.get('mongoose:uri')}});
@@ -28,7 +29,7 @@ module.exports = (cb) => {
                     queryString: {
                         $and: [
                             {
-                                state: 'active'
+                                state: 'rest'
                             },
                             {
                                 'item.hunger.value': {
@@ -50,7 +51,7 @@ module.exports = (cb) => {
                     queryString: {
                         $and: [
                             {
-                                state: 'active'
+                                state: 'rest'
                             },
                             {
                                 'item.thirst.value': {
@@ -384,13 +385,14 @@ module.exports = (cb) => {
          *    если персонаж испытывает голод - кормим и поим (обнуляем оба показателя)
          */
         agenda.define('getEatAndDrink',
-            function(job, done){
+            function (job, done) {
+                console.log(hub.time);
                 async.map(updates.eatAndDrink,
-                    function(eatAndDrink, callback) {
+                    function (eatAndDrink, callback) {
                         updatePersons(eatAndDrink.queryString, eatAndDrink.updateString, options, eatAndDrink.message, callback);
                     },
-                    function(err){
-                        if(err){
+                    function (err) {
+                        if (err) {
                             console.log(err);
                             log.error(err);
                             cb(err);
@@ -401,10 +403,10 @@ module.exports = (cb) => {
                 );
             }
         );
-        agenda.every(agendaCheckStatePeriod, 'changePersonState');
-        agenda.every(agendaCheckActionPeriod, 'changePersonAction');
-        agenda.every(agendaCheckHTSPeriod, 'changeHTS');
-        agenda.every(agendaCheckEatDrinkPeriod, 'getEatAndDrink');
-        agenda.start();
+        // agenda.every(agendaCheckStatePeriod, 'changePersonState');
+        // agenda.every(agendaCheckActionPeriod, 'changePersonAction');
+        // agenda.every(agendaCheckHTSPeriod, 'changeHTS');
+         agenda.every(agendaCheckEatDrinkPeriod, 'getEatAndDrink');
+         agenda.start();
     });
 };
