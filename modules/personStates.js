@@ -157,7 +157,7 @@ module.exports = (cb) => {
             );
         }
         // Грязный хак, 5000 миллисекунд реала в одной минуте мира (worldCalendarKoef == 12)
-        // var worldMinute = 5000;
+        var worldMinute = 5000;
 
         agenda.cancel({name: 'changeHTS'}, () => {
             console.log('Отменили старое задание changeHTS');
@@ -203,6 +203,23 @@ module.exports = (cb) => {
 
         agenda.define('changeHTS',
             (job, done) => {
+                let t1 = Date.now();
+                let stream = Chars.find().stream();
+                stream.on('data', ch => {
+                    // отношение к часам времени, прошедшего с момента последнего обновления
+                    let period = (hub.time.milliseconds - ch.item.lastChangeHTSTime) / (1000 * 3600);
+
+                    ch.markModified('item');
+                    ch.save();
+                })
+                .on('error', (err) => {
+                    console.log(err);
+                })
+                .on('close', () => {
+                    console.log(`Закончили обновление: ${Date.now() - t1} мс`);
+                    done();
+                });
+                /*
                 timeSettings.getWorldTime((err, worldTime) => {
                     if (err) {
                         console.log(err);
@@ -233,6 +250,7 @@ module.exports = (cb) => {
                     // А нужно ли вообще это??? Гораздо проще просто инкрементить показатели по таймеру и всё. Погрешность возможна только на этапе запуска сервера.
                     // Пока оставляю только таймстамп последнего обновления. Так, на всякий случай
                 });
+                */
             }
         );
 
@@ -386,7 +404,6 @@ module.exports = (cb) => {
          */
         agenda.define('getEatAndDrink',
             function (job, done) {
-                console.log(hub.time);
                 async.map(updates.eatAndDrink,
                     function (eatAndDrink, callback) {
                         updatePersons(eatAndDrink.queryString, eatAndDrink.updateString, options, eatAndDrink.message, callback);
@@ -405,8 +422,8 @@ module.exports = (cb) => {
         );
         // agenda.every(agendaCheckStatePeriod, 'changePersonState');
         // agenda.every(agendaCheckActionPeriod, 'changePersonAction');
-        // agenda.every(agendaCheckHTSPeriod, 'changeHTS');
-         agenda.every(agendaCheckEatDrinkPeriod, 'getEatAndDrink');
-         agenda.start();
+        agenda.every(agendaCheckHTSPeriod, 'changeHTS');
+        agenda.every(agendaCheckEatDrinkPeriod, 'getEatAndDrink');
+        agenda.start();
     });
 };
