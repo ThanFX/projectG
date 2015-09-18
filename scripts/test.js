@@ -9,10 +9,16 @@ var configSettings = require('../models/settings').configSettings;
 var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
 var PersonMap = require('../models/person.maps').personMap;
+var hub = require('../config/hub');
 
 var rand = function (min, max) {
-    return Math.floor(min + Math.random()*(max +1 - min));
+    return Math.floor(min + Math.random() * (max + 1 - min));
 };
+
+getData(timeSettings.getWorldTime).then(
+        result => console.log(result),
+        error => console.log(error)
+);
 
 
 

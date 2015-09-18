@@ -4,7 +4,6 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mainTimer = require('./modules/mainTimer');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -57,20 +56,8 @@ app.use(function(err, req, res, next) {
     });
 });
 
-// Start main world timer
-mainTimer();
 
-// Запускаем функции жизни персонажей
-var checkStates = require('./modules/personStates')(function (err) {
-    if (err) {
-        console.log(err);
-    }
-});
-// Запускаем функции работы персонажей
-var checkWorks = require('./modules/personWorks')(function (err) {
-    if (err) {
-        console.log(err);
-    }
-});
+// Start world
+require('./modules/init')();
 
 module.exports = app;

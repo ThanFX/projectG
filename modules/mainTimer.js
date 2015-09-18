@@ -1,6 +1,6 @@
 var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
-var hub = require('../config/hub');
+// var hub = require('../config/hub');
 /**
 * Каждую секунду работы сервера пишем в монгу текущее серверное время
 * и всего время работы запущенного сервера (время жизни мира)
@@ -12,29 +12,16 @@ module.exports = function () {
             console.log(err);
         }
         var firstDelta = Date.now() - curTime.lastServerTime;
-        new Promise((resolve, reject) => {
-            timeSettings.getWorldTime((err, worldTime) => {
+        var mainTimer = function () {
+            timeSettings.setTime(firstDelta, function (err) {
                 if (err) {
-                    reject(err);
+                    log.err(err);
+                    console.log(err);
                 }
-                resolve(worldTime);
+                firstDelta = 0;
+                setTimeout(mainTimer, 1000);
             });
-        }).then(
-            result => {
-                hub.time = result;
-                var mainTimer = function () {
-                    timeSettings.setTime(firstDelta, function (err) {
-                        if (err) {
-                            log.err(err);
-                            console.log(err);
-                        }
-                        firstDelta = 0;
-                        setTimeout(mainTimer, 1000);
-                    });
-                };
-                mainTimer();
-            },
-            error => console.log(error)
-        );
+        };
+        mainTimer();
     });
 };

@@ -1,3 +1,4 @@
+'use strict';
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
 var Chunks = require('../models/chunk').Chunks;
@@ -24,7 +25,7 @@ var worldMapSchema = new Schema({
 });
 
 worldMapSchema.statics.getWorldMapAll = function(callback){
-    var worldMapSettings = this;
+    let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
     worldMapSettings.findOne({settingType:"world"}, function(err, worldMap) {
         if (err) {
             log.err(err);
@@ -35,7 +36,7 @@ worldMapSchema.statics.getWorldMapAll = function(callback){
 };
 
 worldMapSchema.statics.setWorldMapAll = function(worldMap, callback){
-    var worldMapSettings = this;
+    let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
     worldMapSettings.findOne({settingType: "world"}, function(err, wm){
         if(err){
             log.error(err);
@@ -58,7 +59,8 @@ worldMapSchema.statics.setWorldMapAll = function(worldMap, callback){
 
 /* Функция, заполняющая worldMap из коллекции чанков*/
 worldMapSchema.statics.synchronizeWorld = function(callback){
-    this.getWorldMapAll(function(err, wm){
+    let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
+    worldMapSettings.getWorldMapAll(function(err, wm){
         if(err){
             console.log(err);
         } else {
@@ -95,8 +97,8 @@ worldMapSchema.statics.synchronizeWorld = function(callback){
 };
 
 timeSchema.statics.setTime = function(firstDelta, callback){
-    var timeSettings = this;
-    configSettings = mongoose.model('configSettings', configSchema, 'settings');
+    let configSettings = mongoose.model('configSettings', configSchema, 'settings');
+    let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
     configSettings.getConfig(function(err, config) {
         if (err) {
             log.err(err);
@@ -133,7 +135,7 @@ timeSchema.statics.setTime = function(firstDelta, callback){
 };
 
 timeSchema.statics.getTime = function(callback){
-    var timeSettings = this;
+    let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
     timeSettings.findOne({settingType:"time"}, function(err, curTime) {
         if (err) {
             log.err(err);
@@ -144,7 +146,7 @@ timeSchema.statics.getTime = function(callback){
 };
 
 configSchema.statics.setConfig = function(parameters, callback){
-    var configSettings = this;
+    let configSettings = mongoose.model('configSettings', configSchema, 'settings');
     configSettings.findOne({settingType:"config"}, function(err, curConfig){
         if(err) {
             log.err(err);
@@ -169,7 +171,7 @@ configSchema.statics.setConfig = function(parameters, callback){
 };
 
 configSchema.statics.getConfig = function(callback){
-    var configSettings = this;
+    let configSettings = mongoose.model('configSettings', configSchema, 'settings');
     configSettings.findOne({settingType:"config"}, function(err, curConfig) {
         if (err) {
             log.err(err);
@@ -183,8 +185,8 @@ configSchema.statics.getConfig = function(callback){
 *
 */
 timeSchema.statics.getWorldTime = function(callback){
-    var timeSettings = this;
-    configSettings = mongoose.model('configSettings', configSchema, 'settings');
+    let configSettings = mongoose.model('configSettings', configSchema, 'settings');
+    let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
     configSettings.getConfig(function(err, config){
         if(err){
             log.err(err);
