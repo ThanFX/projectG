@@ -6,37 +6,27 @@ var mainTimer = require('../modules/mainTimer');
 var checkStates = require('../modules/personStates');
 var checkWorks = require('../modules/personWorks');
 var log = require('../libs/log')(module);
+var lib = require('../libs');
 
-module.exports = function () {
-    getData(timeSettings.getWorldTime).then(
+module.exports = () => {
+    lib.getData(timeSettings.getWorldTime).then(
         time => {
             hub.time = time;
-            return getData(configSettings.getConfig);
+            return lib.getData(configSettings.getConfig);
         }
     ).then(
-        config => hub.config = config
-    ).then(
-            mainTimer()
-    ).then(
-        checkStates()
-    ).then(
-        checkWorks()
+        config => {
+            hub.config = config;
+            // Пустой промис, чтобы следующий шаг начался только после выполнения текущего!
+            return new Promise((resolve) => resolve());
+        }
+    ).then(() => mainTimer()
+    ).then(() => checkStates()
+    ).then(() => checkWorks()
     ).catch(
         error => {
             log.error(error);
             console.log(error);
         }
     );
-
-
-    function getData (func) {
-        return new Promise((resolve, reject) => {
-            func((error, data) => {
-                if (error) {
-                    reject(error);
-                }
-                resolve(data);
-            });
-        });
-    }
 };

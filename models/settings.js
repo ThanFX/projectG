@@ -24,9 +24,9 @@ var worldMapSchema = new Schema({
     worldMap: []
 });
 
-worldMapSchema.statics.getWorldMapAll = function(callback){
+worldMapSchema.statics.getWorldMapAll = function (callback) {
     let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
-    worldMapSettings.findOne({settingType:"world"}, function(err, worldMap) {
+    worldMapSettings.findOne({settingType: 'world'}, function (err, worldMap) {
         if (err) {
             log.err(err);
             callback(err);
@@ -35,20 +35,20 @@ worldMapSchema.statics.getWorldMapAll = function(callback){
     });
 };
 
-worldMapSchema.statics.setWorldMapAll = function(worldMap, callback){
-    let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
-    worldMapSettings.findOne({settingType: "world"}, function(err, wm){
-        if(err){
+worldMapSchema.statics.setWorldMapAll = function (worldMap, callback) {
+    let WorldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
+    WorldMapSettings.findOne({settingType: 'world'}, function (err, wm) {
+        if (err) {
             log.error(err);
             callback(err);
         }
-        if(!wm) {
-            wm = new worldMapSettings({settingType: "world"});
+        if (!wm) {
+            wm = new WorldMapSettings({settingType: 'world'});
         }
         wm.worldMap = worldMap;
         wm.markModified('worldMap');
-        wm.save(function(err){
-            if(err){
+        wm.save(function (err) {
+            if (err) {
                 log.err(err);
                 callback(err);
             }
@@ -58,21 +58,21 @@ worldMapSchema.statics.setWorldMapAll = function(worldMap, callback){
 };
 
 /* Функция, заполняющая worldMap из коллекции чанков*/
-worldMapSchema.statics.synchronizeWorld = function(callback){
+worldMapSchema.statics.synchronizeWorld = function (callback) {
     let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
-    worldMapSettings.getWorldMapAll(function(err, wm){
-        if(err){
+    worldMapSettings.getWorldMapAll(function (err, wm) {
+        if (err) {
             console.log(err);
         } else {
-            Chunks.find('*', function(err, chunks){
-                if(err){
+            Chunks.find('*', function (err, chunks) {
+                if (err) {
                     console.log(err);
                 } else {
-                    wm.forEach(function(wmItem, i, wm){
+                    wm.forEach(function (wmItem, i, wm) {
                         // Дибильно, но время уже половина первого ночи и не думается :) При разрастании карты необходим глубокий рефакторинг!
-                        for(var j = 0; j < chunks.length; j++){
-                            if(wmItem.x == chunks[j].x && wmItem.y == chunks[j].y) {
-                                if(chunks[j].isExplored == true) {
+                        for (var j = 0; j < chunks.length; j++) {
+                            if (wmItem.x == chunks[j].x && wmItem.y == chunks[j].y) {
+                                if (chunks[j].isExplored == true) {
                                     wmItem.isExplored = true;
                                     wmItem.chunkId = chunks[j]._id;
                                 } else {
@@ -83,11 +83,13 @@ worldMapSchema.statics.synchronizeWorld = function(callback){
                             }
                         }
                     });
-                    WorldMap.setWorldMapAll(wm, function(err){
-                        if(err){
+                    worldMapSettings.setWorldMapAll(wm, function (err) {
+                        if (err) {
                             console.log(err);
-                        } else{
-                            console.log("OK!");
+                            callback(err);
+                        } else {
+                            console.log('OK!');
+                            callback(null);
                         }
                     });
                 }
@@ -96,25 +98,25 @@ worldMapSchema.statics.synchronizeWorld = function(callback){
     });
 };
 
-timeSchema.statics.setTime = function(firstDelta, callback){
+timeSchema.statics.setTime = function (firstDelta, callback) {
     let configSettings = mongoose.model('configSettings', configSchema, 'settings');
-    let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
-    configSettings.getConfig(function(err, config) {
+    let TimeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
+    configSettings.getConfig(function (err, config) {
         if (err) {
             log.err(err);
             callback(err);
         }
         if (!config) {
-            log.err("Ошибка загрузки конфигурации");
+            log.err('Ошибка загрузки конфигурации');
             callback(null);
         }
-        timeSettings.findOne({settingType: 'time'}, function (err, curTime) {
+        TimeSettings.findOne({settingType: 'time'}, function (err, curTime) {
             if (err) {
                 log.err(err);
                 callback(err);
             }
             if (!curTime) {
-                curTime = new timeSettings({settingType: "time"});
+                curTime = new TimeSettings({settingType: 'time'});
             }
 
             var nowTime = Date.now();
@@ -134,9 +136,9 @@ timeSchema.statics.setTime = function(firstDelta, callback){
     });
 };
 
-timeSchema.statics.getTime = function(callback){
+timeSchema.statics.getTime = function (callback) {
     let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
-    timeSettings.findOne({settingType:"time"}, function(err, curTime) {
+    timeSettings.findOne({settingType: 'time'}, function (err, curTime) {
         if (err) {
             log.err(err);
             callback(err);
@@ -145,23 +147,23 @@ timeSchema.statics.getTime = function(callback){
     });
 };
 
-configSchema.statics.setConfig = function(parameters, callback){
-    let configSettings = mongoose.model('configSettings', configSchema, 'settings');
-    configSettings.findOne({settingType:"config"}, function(err, curConfig){
-        if(err) {
+configSchema.statics.setConfig = function (parameters, callback) {
+    let ConfigSettings = mongoose.model('configSettings', configSchema, 'settings');
+    ConfigSettings.findOne({settingType: 'config'}, function (err, curConfig) {
+        if (err) {
             log.err(err);
             callback(err);
         }
-        if(!curConfig) {
-            curConfig = new configSettings({settingType:"config"});
+        if (!curConfig) {
+            curConfig = new ConfigSettings({settingType: 'config'});
         }
         curConfig.calendar = parameters.calendar;
         curConfig.checkPeriods = parameters.checkPeriods;
         console.log(curConfig);
         curConfig.markModified('calendar');
         curConfig.markModified('checkPeriods');
-        curConfig.save(function(err){
-            if(err) {
+        curConfig.save(function (err) {
+            if (err) {
                 log.err(err);
                 callback(err);
             }
@@ -170,9 +172,9 @@ configSchema.statics.setConfig = function(parameters, callback){
     });
 };
 
-configSchema.statics.getConfig = function(callback){
+configSchema.statics.getConfig = function (callback) {
     let configSettings = mongoose.model('configSettings', configSchema, 'settings');
-    configSettings.findOne({settingType:"config"}, function(err, curConfig) {
+    configSettings.findOne({settingType: 'config'}, function (err, curConfig) {
         if (err) {
             log.err(err);
             callback(err);
@@ -184,26 +186,26 @@ configSchema.statics.getConfig = function(callback){
 /* Рассчитываем нормальное календарное время мира
 *
 */
-timeSchema.statics.getWorldTime = function(callback){
+timeSchema.statics.getWorldTime = function (callback) {
     let configSettings = mongoose.model('configSettings', configSchema, 'settings');
     let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
-    configSettings.getConfig(function(err, config){
-        if(err){
+    configSettings.getConfig(function (err, config) {
+        if (err) {
             log.err(err);
             callback(err);
         }
-        if(!config){
-            log.err("Ошибка загрузки конфигурации");
+        if (!config) {
+            log.err('Ошибка загрузки конфигурации');
             callback(null);
         }
         // Читаем конфиг календаря
-        timeSettings.getTime(function(err, curTime){
-            if(err){
+        timeSettings.getTime(function (err, curTime) {
+            if (err) {
                 log.err(err);
                 callback(err);
             }
-            if(!curTime){
-                log.err("Ошибка загрузки времени");
+            if (!curTime) {
+                log.err('Ошибка загрузки времени');
                 callback(null);
             }
             callback(null, convertTimeToDate(curTime.lastWorldTime, config.calendar));
@@ -212,7 +214,7 @@ timeSchema.statics.getWorldTime = function(callback){
 };
 
 function convertTimeToDate (time, calendar) {
-    // Пересчитываем количество "реальных" милисекунд жизни мира
+    // Пересчитываем количество 'реальных' милисекунд жизни мира
     // в виртуальные секунды относительно коэффициента календаря.
     var worldSeconds = (time * calendar.worldCalendarKoef) / 1000;
     // let sec = worldSeconds;
