@@ -56,13 +56,22 @@ module.exports = () => {
     agenda.define('changeHTS',
         (job, done) => {
             let t1 = Date.now();
+            // тестовый "синий" персонаж: {personId: '55913fe453470d6216a7f6ff'}
             let stream = Chars.find().stream();
             stream.on('data', ch => {
                 // отношение к часам времени, прошедшего с момента последнего обновления
                 let period = ( (hub.time.milliseconds - ch.item.lastChangeHTSTime) *
                     hub.config.calendar.worldCalendarKoef) / (1000 * 3600);
-                console.log(period);
                 ch.item.lastChangeHTSTime = +hub.time.milliseconds;
+                for (let key in hub.config.changeSpeed[ch.state]) {
+                    if (!hub.config.changeSpeed[ch.state][key]) {
+                        continue;
+                    }
+                    ch.item[key].value += (hub.config.changeSpeed[ch.state][key] * period);
+                    if (ch.item[key].value < 0) {
+                        ch.item[key].value = 0.0;
+                    }
+                }
                 ch.markModified('item');
                 ch.save();
             })
