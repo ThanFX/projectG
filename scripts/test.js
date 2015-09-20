@@ -245,65 +245,6 @@ async.whilst(
 //    }
 //}
 
-
-
-/*
-timeSettings.getWorldTime(function(err, wt){
-    if(err){
-        console.log(err);
-    } else {
-        console.log(wt);
-        timeSettings.getTime(function (err, curTime) {
-            if (err) {
-                log.err(err);
-            }
-            console.log(curTime);
-            console.log(Date.now());
-            console.log(curTime.lastServerTime);
-            var firstDelta = Date.now() - curTime.lastServerTime;
-            console.log(firstDelta);
-            var mainTimer = function () {
-                timeSettings.setTime(firstDelta, function (err, curTime) {
-                    if (err) {
-                        log.err(err);
-                    }
-                    firstDelta = 0;
-                    console.log(curTime);
-                    timeSettings.getWorldTime(function (err1, wt1) {
-                        if (err) {
-                            console.log(err1);
-                        } else {
-                            console.log(wt1);
-                        }
-                    });
-                    //setTimeout(mainTimer, 1000);
-                });
-            };
-            mainTimer();
-        });
-    }
-});
-*/
-
-/*
-Chunks.getChunks('*', function(err, chunks){
-    if(err){
-        console.log(err);
-    } else {
-        console.log(chunks);
-    }
-});
-*/
-/*
-Chars.update({state:"Сон"}, {state:"Активен"}, {multi: true}, function(err){
-    if(err){
-        console.log(err);
-    } else {
-        console.log('Обновили');
-    }
-});
-*/
-
 /*
 //Добавление в характеристики всех персонажей новой характеристики
 Person.getPersonCh('*', function(err, persons){

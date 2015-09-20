@@ -22,7 +22,7 @@ module.exports = () => {
         }
     ).then(() => mainTimer()
     ).then(() => checkStates()
-    ).then(() => checkWorks()
+    // ).then(() => checkWorks()
     ).catch(
         error => {
             log.error(error);
