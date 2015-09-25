@@ -6,7 +6,6 @@ var hub = require('../config/hub');
 var eatAndDrink = require('./jobs/EatAndDrink');
 var htfs = require('./jobs/htfs');
 var sleepState = require('./jobs/sleepState');
-var workState = require('./jobs/workState');
 
 module.exports = () => {
     var agenda = new Agenda({db: { address: config.get('mongoose:uri')}});
@@ -39,7 +38,6 @@ module.exports = () => {
     agenda.define('changePersonState',
         (job, done) => {
             sleepState(done);
-            workState(done);
         }
     );
     agenda.every(agendaCheckHTSPeriod, 'changeHTS');

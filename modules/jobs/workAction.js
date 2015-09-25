@@ -7,6 +7,7 @@ module.exports = (done) => {
     let query = {$and: [
                     {personId: '55913fe453470d6216a7f6ff'},
                     {state: 'rest'},
+                    {action: 'none'},
                     {'item.hunger.value': {$lte: 3.0} },
                     {'item.thirst.value': {$lte: 3.0} },
                     {'item.fatigue.value': {$lte: 10.0} },
@@ -15,7 +16,7 @@ module.exports = (done) => {
     let count = 0;
     let stream = Chars.find(query).stream();
     stream.on('data', ch => {
-        ch.state = 'work';
+        ch.action = 'job';
         count++;
         ch.save();
     })
@@ -23,7 +24,7 @@ module.exports = (done) => {
         console.log(err);
     })
     .on('close', () => {
-        console.log(`Закончили обновление state с rest на work, ${count} персонажей: ${Date.now() - t1} мс`);
+        console.log(`Закончили обновление action с none на job, ${count} персонажей: ${Date.now() - t1} мс`);
         done();
     });
 };
