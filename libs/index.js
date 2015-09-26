@@ -2,7 +2,6 @@
 exports.getData = function (func) {
     var args = [].slice.call(arguments);
     args.shift();
-    console.log(arguments);
     return new Promise((resolve, reject) => {
         args.push((error, data) => {
             if (error) {

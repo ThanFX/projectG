@@ -29,7 +29,7 @@ module.exports = (done) => {
         console.log(err);
     })
     .on('close', () => {
-        console.log(`Закончили обновление HTS, ${count} персонажей: ${Date.now() - t1} мс`);
+        console.log(`Закончили обновление HTFS, ${count} персонажей: ${Date.now() - t1} мс`);
         done();
     });
 };
