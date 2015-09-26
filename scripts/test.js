@@ -1,5 +1,4 @@
 'use strict';
-
 var async = require('async');
 var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
@@ -10,10 +9,48 @@ var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
 var PersonMap = require('../models/person.maps').personMap;
 var hub = require('../config/hub');
+var lib = require('../libs');
 
 var rand = function (min, max) {
     return Math.floor(min + Math.random() * (max + 1 - min));
 };
+
+
+lib.getData(timeSettings.getWorldTime).then(
+        time => console.log(time)
+        // return lib.getData(configSettings.getConfig);
+)
+.catch(
+    error => console.log(error)
+);
+
+/*
+let t1 = Date.now();
+let query = {$and: [
+    {personId: '55913fe453470d6216a7f6ff'},
+    {state: 'rest'},
+    {action: 'work'},
+    {'item.hunger.value': {$lte: 3.0} },
+    {'item.thirst.value': {$lte: 3.0} },
+    {'item.fatigue.value': {$lte: 10.0} },
+    {'item.somnolency.value': {$lte: 20.0} }
+] };
+
+let count = 0;
+let stream = Chars.find(query).stream();
+stream.on('data', ch => {
+    ch.action = 'job';
+    count++;
+    ch.save();
+})
+    .on('error', (err) => {
+        console.log(err);
+    })
+    .on('close', () => {
+        console.log(`Закончили обновление action с none на job, ${count} персонажей: ${Date.now() - t1} мс`);
+    });
+*/
+
 
 /*
 // Взяли рыбаков

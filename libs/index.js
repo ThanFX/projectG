@@ -1,12 +1,15 @@
-module.exports = {
-    getData: (func) => {
-        return new Promise((resolve, reject) => {
-            func((error, data) => {
-                if (error) {
-                    reject(error);
-                }
-                resolve(data);
-            });
+'use strict';
+exports.getData = function (func) {
+    var args = [].slice.call(arguments);
+    args.shift();
+    console.log(arguments);
+    return new Promise((resolve, reject) => {
+        args.push((error, data) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(data);
         });
-    }
+        func.apply(null, args);
+    });
 };
