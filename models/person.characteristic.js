@@ -17,6 +17,11 @@ var schema = new Schema({
         x: Number,
         y: Number
     },
+    skills: {
+        job: Array,
+        additional: Array,
+        _id: false
+    },
     state: String,
     action: String,
     stage: String,

@@ -20,7 +20,8 @@ let t1 = Date.now();
 let query = {$and: [
     {personId: '55913fe453470d6216a7f6ff'},
     {state: 'rest'},
-    {action: 'job'}
+    {action: 'job'},
+    {stage: 'none'}
 ] };
 
 let count = 0;
@@ -28,16 +29,28 @@ let stream = Chars.find(query).stream();
 stream.on('data', ch => {
     let job = ch.skills.job[0];
     if (job.needLocation) {
-
+        lib.getData(PersonMap.getPersonJobChunk, ch.personId, job.name, ch.location).then(
+            personJobMap => {
+                if (personJobMap) {
+                    console.log(`Чанк для работы: ${personJobMap}`);
+                } else {
+                    return lib.getData(PersonMap.getPersonExploreChunk, ch.personId, job.name, ch.location);
+                }
+            }
+        ).then(
+            /* Запускаем функцию исследования */
+        ).catch(
+            error => console.log(error)
+        );
     }
     count++;
-    ch.save();
+    // ch.save();
 })
 .on('error', (err) => {
     console.log(err);
 })
 .on('close', () => {
-    console.log(`Закончили обновление action с none на job, ${count} персонажей: ${Date.now() - t1} мс`);
+    console.log(`Закончили разбираться с назначением работ, ${count} персонажей: ${Date.now() - t1} мс`);
 });
 
 /*

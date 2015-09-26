@@ -6,7 +6,7 @@ module.exports = (done) => {
 
     let query = {$and: [
         {personId: '55913fe453470d6216a7f6ff'},
-        {state: 'rest'},
+        {stage: 'none'},
         {action: 'job'}
     ] };
     let count = 0;

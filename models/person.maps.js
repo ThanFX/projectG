@@ -1,3 +1,4 @@
+'use strict';
 var log = require('../libs/log')(module);
 var mongoose = require('../libs/mongoose');
 var Schema = mongoose.Schema;
@@ -38,22 +39,33 @@ schema.statics.isPersonKnowChunk = (personId, chunkId, callback) => {
     });
 };
 
-schema.statics.getPersonJobChunk = (personId, job, callback) => {
+schema.statics.getPersonJobChunk = (personId, job, location, callback) => {
     let PersonMap = mongoose.model('person.maps', schema);
-    PersonMap.findOne({personId: personId, 'maps.jobs.job': job}, (err, personMap) => {
+    PersonMap.find({personId: personId, 'maps.jobs.job': job}, (err, personMap) => {
         if (err) {
             log.error(err);
             callback(err);
         }
-        if (personMap) {
-            var jobChunks = [];
-            for (let i = 0; i < personMap.maps.length; i++) {
-                if (!(personMap.maps[i].job == job)) continue;
-                jobChunks.push(personMap.maps[i]);
-            }
-            callback(null, jobChunks);
+        /* Тут нужно будет добавить блок поиска самого лучшего чанка
+        *  А сейчас тупо возвращаем первый
+        */
+        callback(null, personMap[0]);
+    });
+};
+
+schema.statics.getPersonExploreChunk = (personId, job, location, callback) => {
+    let PersonMap = mongoose.model('person.maps', schema);
+    PersonMap.find({personId: personId, 'maps.jobs.job': job}, (err, personMap) => {
+        if (err) {
+            log.error(err);
+            callback(err);
         }
-        callback(null, null);
+        /* Если вообще нет исследованных чанков - возвращаем тот, в котором находится персонаж */
+        if (!personMap) {
+            callback(null, location);
+        }
+        /* В противном случаем начинаем как-то искать перспективные чанки*/
+        callback(null, personMap[0]);
     });
 };
 
