@@ -32,6 +32,14 @@ var moveSchema = new Schema({
     endTime: Number
 });
 
+jobSchema.statics.createJob = (job, callback) => {
+    let Job = mongoose.model('person.jobs', jobSchema);
+    let job = new Job({
+        personId: job.personId,
+        type: job.type,
+        startTime: job.startTime
+    });
+};
 
 exports.PersonJobs = mongoose.model('person.jobs', jobSchema);
 exports.PersonMoves = mongoose.model('person.jobs', moveSchema);

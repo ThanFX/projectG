@@ -16,7 +16,8 @@ var schema = new Schema({
 });
 
 schema.statics.getPersonMap = (personId, callback) => {
-    this.findOne({personId: personId}, (err, personMap) => {
+    let PersonMap = mongoose.model('person.maps', schema);
+    PersonMap.findOne({personId: personId}, (err, personMap) => {
         if (err) {
             log.error(err);
             callback(err);
@@ -61,11 +62,13 @@ schema.statics.getPersonExploreChunk = (personId, job, location, callback) => {
             callback(err);
         }
         /* Если вообще нет исследованных чанков - возвращаем тот, в котором находится персонаж */
-        if (!personMap) {
-            callback(null, location);
+        if (!personMap || personMap.length == 0) {
+            callback(location);
         }
-        /* В противном случаем начинаем как-то искать перспективные чанки*/
-        callback(null, personMap[0]);
+        /* В противном случаем начинаем как-то искать перспективные чанки
+        * А пока вернем тупо первый
+        * */
+        callback(personMap[0]);
     });
 };
 

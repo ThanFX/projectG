@@ -8,6 +8,7 @@ var configSettings = require('../models/settings').configSettings;
 var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
 var PersonMap = require('../models/person.maps').personMap;
+var PersonJobs = require('../models/person.jobs').PersonJobs;
 var hub = require('../config/hub');
 var lib = require('../libs');
 
@@ -34,11 +35,23 @@ stream.on('data', ch => {
                 if (personJobMap) {
                     console.log(`Чанк для работы: ${personJobMap}`);
                 } else {
+                    console.log('Нет чанков для работы, ищем чанки для исследования');
                     return lib.getData(PersonMap.getPersonExploreChunk, ch.personId, job.name, ch.location);
                 }
             }
         ).then(
-            /* Запускаем функцию исследования */
+            exploreChunk => {
+                if (exploreChunk) {
+                    /* Запускаем функцию исследования */
+                    console.log(`Чанк для исследования: ${exploreChunk}`);
+                } else {
+                    /* В будущем возможно переделать на поиск другой работы */
+                    console.log('И для исследования чанков нету, отправляемся заниматься домашними делами');
+                    // ch.action = 'none';
+                    // ch.state = 'chores';
+                    ch.save();
+                }
+            }
         ).catch(
             error => console.log(error)
         );
