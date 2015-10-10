@@ -6,16 +6,16 @@ var Schema = mongoose.Schema;
 var jobSchema = new Schema({
     personId: Schema.Types.ObjectId,
     type: String,
-    state: String,
-    action: String,
-    stage: String,
+    currentLocation: Schema.Types.Mixed,
+    jobLocation: Schema.Types.Mixed,
+    isFinished: Boolean,
     startTime: Number,
     endTime: Number
 });
 
 var moveSchema = new Schema({
     personId: Schema.Types.ObjectId,
-    type: String,
+    job: String,
     state: String,
     moveFrom: {
         _id: false,
@@ -34,12 +34,18 @@ var moveSchema = new Schema({
 
 jobSchema.statics.createJob = (job, callback) => {
     let Job = mongoose.model('person.jobs', jobSchema);
-    let job = new Job({
-        personId: job.personId,
-        type: job.type,
-        startTime: job.startTime
+    let personJob = new Job(job);
+    personJob.markModified('currentLocation');
+    personJob.markModified('jobLocation');
+    personJob.save((err) => {
+        if (err) {
+            console.log(err);
+            if (callback) {
+                callback(err);
+            }
+        }
     });
 };
 
-exports.PersonJobs = mongoose.model('person.jobs', jobSchema);
-exports.PersonMoves = mongoose.model('person.jobs', moveSchema);
+exports.PersonJobs = mongoose.model('personJob', jobSchema, 'person.jobs');
+exports.PersonMoves = mongoose.model('peronMove', moveSchema, 'person.jobs');

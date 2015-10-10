@@ -63,12 +63,12 @@ schema.statics.getPersonExploreChunk = (personId, job, location, callback) => {
         }
         /* Если вообще нет исследованных чанков - возвращаем тот, в котором находится персонаж */
         if (!personMap || personMap.length == 0) {
-            callback(location);
+            callback(null, location);
         }
         /* В противном случаем начинаем как-то искать перспективные чанки
         * А пока вернем тупо первый
         * */
-        callback(personMap[0]);
+        callback(null, personMap[0]);
     });
 };
 
@@ -108,4 +108,4 @@ schema.statics.addOrUpdateChunk = (personId, chunk, callback) => {
     });
 };
 
-exports.personMap = mongoose.model('person.maps', schema);
+exports.personMap = mongoose.model('personMap', schema, 'person.maps');

@@ -16,56 +16,6 @@ var rand = function (min, max) {
     return Math.floor(min + Math.random() * (max + 1 - min));
 };
 
-let t1 = Date.now();
-
-let query = {$and: [
-    {personId: '55913fe453470d6216a7f6ff'},
-    {state: 'rest'},
-    {action: 'job'},
-    {stage: 'none'}
-] };
-
-let count = 0;
-let stream = Chars.find(query).stream();
-stream.on('data', ch => {
-    let job = ch.skills.job[0];
-    if (job.needLocation) {
-        lib.getData(PersonMap.getPersonJobChunk, ch.personId, job.name, ch.location).then(
-            personJobMap => {
-                if (personJobMap) {
-                    console.log(`Чанк для работы: ${personJobMap}`);
-                } else {
-                    console.log('Нет чанков для работы, ищем чанки для исследования');
-                    return lib.getData(PersonMap.getPersonExploreChunk, ch.personId, job.name, ch.location);
-                }
-            }
-        ).then(
-            exploreChunk => {
-                if (exploreChunk) {
-                    /* Запускаем функцию исследования */
-                    console.log(`Чанк для исследования: ${exploreChunk}`);
-                } else {
-                    /* В будущем возможно переделать на поиск другой работы */
-                    console.log('И для исследования чанков нету, отправляемся заниматься домашними делами');
-                    // ch.action = 'none';
-                    // ch.state = 'chores';
-                    ch.save();
-                }
-            }
-        ).catch(
-            error => console.log(error)
-        );
-    }
-    count++;
-    // ch.save();
-})
-.on('error', (err) => {
-    console.log(err);
-})
-.on('close', () => {
-    console.log(`Закончили разбираться с назначением работ, ${count} персонажей: ${Date.now() - t1} мс`);
-});
-
 /*
 // Взяли рыбаков
 Person.getPersonCh({job: "Fishing"}, function(err, person){
@@ -92,7 +42,8 @@ function exploreJobChunk(personId){
         if(err){
             console.log(err);
         } else {
-            // Если вообще нет разведанных чанков - запускаем функцию разведки чанка (без параметров местности - разведка чанка, в котором находится персонаж)
+            // Если вообще нет разведанных чанков - запускаем функцию разведки чанка (без параметров местности -
+            // разведка чанка, в котором находится персонаж)
             if(!personMap || personMap.maps.length == 0){
                 exploreChunk(personId);
             }
