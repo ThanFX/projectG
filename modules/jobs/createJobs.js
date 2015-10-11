@@ -36,7 +36,7 @@ module.exports = (done) => {
                     if (exploreChunk) {
                         /* Создаём задачу на исследование */
                         console.log(`Чанк для исследования: ${exploreChunk}`);
-                        PersonJobs.createJob({
+                        lib.getData(PersonJobs.createJob, {
                             personId: ch.personId,
                             job: 'explore',
                             currentLocation: ch.location,
@@ -44,9 +44,15 @@ module.exports = (done) => {
                             isFinished: false,
                             startTime: hub.time.milliseconds,
                             /* ToDo! Создаём задачу на 2 часа времени мира, потом нужно будет переделать нормально */
-                            endTime: hub.time.milliseconds + (5000 * 120)
-                        }, null);
-                        ch.action = 'explore';
+                            endTime: +hub.time.milliseconds + (5000 * 120)
+                        }).then(
+                            () => {
+                                ch.action = 'explore';
+                                ch.state = 'move';
+                            }
+                        ).catch(
+                            error => console.log(`Ошибка: ${error}`)
+                        );
                     } else {
                         /* В будущем возможно переделать на поиск другой работы */
                         console.log('И для исследования чанков нету, отправляемся заниматься домашними делами');

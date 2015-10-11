@@ -24,11 +24,75 @@ var worldMapSchema = new Schema({
     worldMap: []
 });
 
+var skillsSchema = new Schema({
+    settingType: String,
+    skills: [{
+        name: String,
+        title: String,
+        isJob: Boolean,
+        isPeriodic: Boolean,
+        periodInMinutes: Number,
+        needLocation: Boolean,
+        locations: [],
+        minValue: Number,
+        maxValue: Number
+    }]
+});
+
+skillsSchema.statics.getSkills = (callback) => {
+    let SkillsSettings = mongoose.model('skillsSettings', skillsSchema, 'settings');
+    SkillsSettings.findOne({settingType: 'skills'}, (err, skills) => {
+        if (err) {
+            console.log(err);
+            callback(err);
+        }
+        callback(null, skills.skills);
+    });
+};
+
+skillsSchema.statics.addOrUpdateSkill = (skill, callback) => {
+    let SkillsSettings = mongoose.model('skillsSettings', skillsSchema, 'settings');
+    SkillsSettings.findOne({settingType: 'skills'}, (err, skills) => {
+        if (err) {
+            console.log(err);
+            callback(err);
+        }
+        let isExist = false;
+        if (!skills) {
+            skills = new SkillsSettings({settingType: 'skills', skills: []});
+        }
+        for (let i = 0; i < skills.length; i++) {
+            if (skills.skills[i].name == skill.name) {
+                for (let key in skill) {
+                    if (!skill.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    skills.skills[i][key] = skill[key];
+                }
+                isExist = true;
+            }
+            if (isExist) {
+                break;
+            }
+        }
+        if (!isExist) {
+            skills.skills.push(skill);
+        }
+        skills.save((err) => {
+            if (err) {
+                console.log(err);
+                callback(err);
+            }
+            callback(null);
+        });
+    });
+};
+
 worldMapSchema.statics.getWorldMapAll = function (callback) {
     let worldMapSettings = mongoose.model('worldMap', worldMapSchema, 'settings');
     worldMapSettings.findOne({settingType: 'world'}, function (err, worldMap) {
         if (err) {
-            log.err(err);
+            log.error(err);
             callback(err);
         }
         callback(null, worldMap.worldMap);
@@ -49,7 +113,7 @@ worldMapSchema.statics.setWorldMapAll = function (worldMap, callback) {
         wm.markModified('worldMap');
         wm.save(function (err) {
             if (err) {
-                log.err(err);
+                log.error(err);
                 callback(err);
             }
             callback(null, wm.worldMap);
@@ -103,16 +167,16 @@ timeSchema.statics.setTime = function (firstDelta, callback) {
     let TimeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
     configSettings.getConfig(function (err, config) {
         if (err) {
-            log.err(err);
+            log.error(err);
             callback(err);
         }
         if (!config) {
-            log.err('Ошибка загрузки конфигурации');
+            log.error('Ошибка загрузки конфигурации');
             callback(null);
         }
         TimeSettings.findOne({settingType: 'time'}, function (err, curTime) {
             if (err) {
-                log.err(err);
+                log.error(err);
                 callback(err);
             }
             if (!curTime) {
@@ -127,7 +191,7 @@ timeSchema.statics.setTime = function (firstDelta, callback) {
             curTime.lastServerTime = nowTime;
             curTime.save(function (err) {
                 if (err) {
-                    log.err(err);
+                    log.error(err);
                     callback(err);
                 }
                 callback(null, curTime);
@@ -140,7 +204,7 @@ timeSchema.statics.getTime = function (callback) {
     let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
     timeSettings.findOne({settingType: 'time'}, function (err, curTime) {
         if (err) {
-            log.err(err);
+            log.error(err);
             callback(err);
         }
         callback(null, curTime);
@@ -151,7 +215,7 @@ configSchema.statics.setConfig = function (parameters, callback) {
     let ConfigSettings = mongoose.model('configSettings', configSchema, 'settings');
     ConfigSettings.findOne({settingType: 'config'}, function (err, curConfig) {
         if (err) {
-            log.err(err);
+            log.error(err);
             callback(err);
         }
         if (!curConfig) {
@@ -164,7 +228,7 @@ configSchema.statics.setConfig = function (parameters, callback) {
         curConfig.markModified('checkPeriods');
         curConfig.save(function (err) {
             if (err) {
-                log.err(err);
+                log.error(err);
                 callback(err);
             }
             callback(null, curConfig);
@@ -176,7 +240,7 @@ configSchema.statics.getConfig = function (callback) {
     let configSettings = mongoose.model('configSettings', configSchema, 'settings');
     configSettings.findOne({settingType: 'config'}, function (err, curConfig) {
         if (err) {
-            log.err(err);
+            log.error(err);
             callback(err);
         }
         callback(null, curConfig);
@@ -191,21 +255,21 @@ timeSchema.statics.getWorldTime = function (callback) {
     let timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
     configSettings.getConfig(function (err, config) {
         if (err) {
-            log.err(err);
+            log.error(err);
             callback(err);
         }
         if (!config) {
-            log.err('Ошибка загрузки конфигурации');
+            log.error('Ошибка загрузки конфигурации');
             callback(null);
         }
         // Читаем конфиг календаря
         timeSettings.getTime(function (err, curTime) {
             if (err) {
-                log.err(err);
+                log.error(err);
                 callback(err);
             }
             if (!curTime) {
-                log.err('Ошибка загрузки времени');
+                log.error('Ошибка загрузки времени');
                 callback(null);
             }
             callback(null, convertTimeToDate(curTime.lastWorldTime, config.calendar));
@@ -228,7 +292,7 @@ function convertTimeToDate (time, calendar) {
     // Для года, месяца, декады и дня нет нулевых значений, они начинаются с единицы, но максимальное на 1 больше
     periods.forEach((period, i, periods) => {
         if (period.timeInSeconds > worldSeconds) {
-            worldTime[period.periodLabel] = 0 + +period.minValue;
+            worldTime[period.periodLabel] = 0 + period.minValue;
         } else {
             worldTime[period.periodLabel] = Math.floor(worldSeconds / period.timeInSeconds);
             worldSeconds -= (worldTime[period.periodLabel] * period.timeInSeconds);
@@ -242,3 +306,4 @@ function convertTimeToDate (time, calendar) {
 exports.timeSettings = mongoose.model('timeSettings', timeSchema, 'settings');
 exports.configSettings = mongoose.model('configSettings', configSchema, 'settings');
 exports.worldMap = mongoose.model('worldMap', worldMapSchema, 'settings');
+exports.skillsSettings = mongoose.model('skillsSettings', skillsSchema, 'settings');

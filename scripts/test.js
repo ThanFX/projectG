@@ -4,6 +4,7 @@ var Person = require('../models/person').Person;
 var Chars = require('../models/person.characteristic').PersonCh;
 var log = require('../libs/log')(module);
 var timeSettings = require('../models/settings').timeSettings;
+var skillsSettings = require('../models/settings').skillsSettings;
 var configSettings = require('../models/settings').configSettings;
 var Chunks = require('../models/chunk').Chunks;
 var WorldMap = require('../models/settings').worldMap;
@@ -15,6 +16,22 @@ var lib = require('../libs');
 var rand = function (min, max) {
     return Math.floor(min + Math.random() * (max + 1 - min));
 };
+
+lib.getData(skillsSettings.getSkills, {
+    name: 'explore',
+    title: 'Разведка',
+    isJob: true,
+    needLocation: false,
+    locations: [],
+    isPeriodic: true,
+    periodInMinutes: 120.0,
+    minValue: 1.0,
+    maxValue: 10.0
+}).then(
+    console.log(`Сохранили скилл`)
+).catch(
+    error => console.log(`Error: ${error}`)
+);
 
 /*
 // Взяли рыбаков
